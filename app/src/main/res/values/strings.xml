@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Finance App</string>
+    <string name="nav_home">Tổng quan</string>
+    <string name="nav_wallet">Ví</string>
+    <string name="nav_transaction">Giao dịch</string>
+    <string name="nav_report">Báo cáo</string>
+    <string name="nav_budget">Ngân sách</string>
+    <string name="placeholder_module">Module khởi tạo — triển khai theo use case nhóm.</string>
+</resources>
