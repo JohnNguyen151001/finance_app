@@ -1,10 +1,149 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Finance App</string>
+    <string name="app_name">SpendSmart</string>
+    <string name="tagline">Quản lý tài chính thông minh</string>
+
     <string name="nav_home">Tổng quan</string>
-    <string name="nav_wallet">Ví</string>
-    <string name="nav_transaction">Giao dịch</string>
-    <string name="nav_report">Báo cáo</string>
+    <string name="nav_ledger">Sổ giao dịch</string>
+    <string name="nav_add">Thêm</string>
     <string name="nav_budget">Ngân sách</string>
-    <string name="placeholder_module">Module khởi tạo — triển khai theo use case nhóm.</string>
+    <string name="nav_profile">Tài khoản</string>
+    <string name="nav_ledger_short">Sổ GD</string>
+
+    <string name="login_email_label">Email</string>
+    <string name="login_password_label">Mật khẩu</string>
+    <string name="login_email_hint">Nhập email của bạn</string>
+    <string name="login_password_hint">Nhập mật khẩu</string>
+    <string name="login_forgot">Quên mật khẩu?</string>
+    <string name="login_submit">Đăng nhập</string>
+    <string name="login_social_divider">Hoặc đăng nhập bằng</string>
+    <string name="login_google">Tiếp tục với Google</string>
+    <string name="login_apple">Tiếp tục với Apple</string>
+    <string name="login_register_prompt">Chưa có tài khoản? </string>
+    <string name="login_register_action">Đăng ký ngay</string>
+    <string name="login_fill_both">Vui lòng nhập email và mật khẩu.</string>
+
+    <string name="home_total_balance">Tổng số dư ⓘ</string>
+    <string name="home_my_wallets">Ví của tôi</string>
+    <string name="home_see_all">Xem tất cả</string>
+    <string name="home_premium_title">Bạn đã tận hưởng Premium hết chưa?</string>
+    <string name="home_premium_sub">Khai thác tối đa khi Premium đang miễn phí</string>
+    <string name="home_premium_cta">Trải nghiệm ngay →  ⏰ 13 ngày 23 giờ</string>
+    <string name="home_monthly_report">Báo cáo tháng này</string>
+    <string name="home_view_report">Xem báo cáo</string>
+    <string name="home_total_spent">Tổng đã chi</string>
+    <string name="home_total_income">Tổng thu</string>
+    <string name="home_top_spending">Chi tiêu nhiều nhất</string>
+    <string name="home_tab_week">Tuần</string>
+    <string name="home_tab_month">Tháng</string>
+    <string name="home_recent">Giao dịch gần đây</string>
+
+    <string name="ledger_title">Sổ Giao Dịch</string>
+    <string name="ledger_tab_this_month">Tháng này</string>
+    <string name="ledger_tab_last_month">Tháng trước</string>
+    <string name="ledger_tab_custom">Tùy chọn</string>
+    <string name="ledger_expense">Chi</string>
+    <string name="ledger_income">Thu</string>
+    <string name="ledger_balance">Số dư</string>
+
+    <string name="add_title">Thêm Giao Dịch</string>
+    <string name="add_cancel">Huỷ</string>
+    <string name="add_tab_expense">Khoản chi</string>
+    <string name="add_tab_income">Khoản thu</string>
+    <string name="add_tab_debt">Vay / Nợ</string>
+    <string name="add_wallet">Ví</string>
+    <string name="add_category">Danh mục</string>
+    <string name="add_note">Ghi chú</string>
+    <string name="add_date">Ngày</string>
+    <string name="add_exclude_report">Không tính vào báo cáo</string>
+    <string name="add_save">Lưu</string>
+    <string name="add_amount_hint">0</string>
+
+    <string name="budget_title">Ngân Sách</string>
+    <string name="budget_title_current">Ngân sách đang áp dụng</string>
+    <string name="budget_this_month">Tháng này</string>
+    <string name="budget_add">+ Thêm mới</string>
+    <string name="budget_remaining">Còn lại</string>
+    <string name="budget_remaining_prefix">Còn lại</string>
+    <string name="budget_spent">Đã chi</string>
+    <string name="budget_spent_prefix">Đã chi</string>
+    <string name="budget_gauge_label">Số tiền bạn có thể chi</string>
+    <string name="budget_stat_total">Tổng ngân sách</string>
+    <string name="budget_stat_spent">Tổng đã chi</string>
+    <string name="budget_stat_days">Đến cuối tháng</string>
+    <string name="budget_days_suffix">ngày</string>
+    <string name="budget_create">Tạo Ngân sách</string>
+    <string name="budget_today">Hôm nay</string>
+    <string name="budget_more">Thêm tùy chọn</string>
+    <string name="budget_help">Trợ giúp</string>
+    <string name="budget_add_flow_title">Thêm ngân sách</string>
+    <string name="budget_select_group_title">Chọn nhóm</string>
+    <string name="budget_done">Xong</string>
+    <string name="search_hint">Tìm kiếm</string>
+    <string name="budget_all_groups">Tất cả các nhóm</string>
+    <string name="expense_section_label">KHOẢN CHI</string>
+
+    <string name="report_title">Báo cáo theo nhóm</string>
+    <string name="report_back_home">Tổng quan</string>
+    <string name="report_category_hint">Chọn nhóm</string>
+
+    <string name="profile_name_placeholder">Nguyễn Văn A</string>
+    <string name="profile_wallets">Quản lý Ví tài khoản</string>
+    <string name="profile_categories">Danh mục chi tiêu</string>
+    <string name="profile_alerts">Cảnh báo vượt hạn mức</string>
+    <string name="profile_settings">Cài đặt chung</string>
+    <string name="profile_logout">Đăng xuất</string>
+
+    <string name="wallet_title">Ví của tôi</string>
+    <string name="currency_suffix"> đ</string>
+
+    <string name="category_title">Nhóm</string>
+    <string name="category_add_new">+ Nhóm mới</string>
+    <string name="category_show_inactive">Hiện thị nhóm không hoạt động</string>
+    <string name="profile_section_manage">QUẢN LÝ</string>
+
+    <!-- Budget edit -->
+    <string name="budget_edit_title">Thiết lập ngân sách</string>
+    <string name="budget_edit">Chỉnh sửa</string>
+    <string name="budget_save">Lưu ngân sách</string>
+    <string name="budget_limit_label">Hạn mức chi tiêu</string>
+    <string name="budget_limit_hint">Nhập số tiền</string>
+    <string name="budget_limit_required">Vui lòng nhập hạn mức hợp lệ</string>
+    <string name="budget_quick_amounts">Chọn nhanh</string>
+    <string name="budget_list_title">Danh sách ngân sách</string>
+    <string name="budget_empty_title">Chưa có ngân sách nào</string>
+    <string name="budget_empty_sub">Nhấn "Tạo Ngân sách" để bắt đầu theo dõi chi tiêu</string>
+    <string name="budget_spent_this_month">Đã chi tháng này</string>
+    <string name="budget_current_limit_label">Hạn mức hiện tại</string>
+    <string name="budget_select_min_one">Vui lòng chọn ít nhất một nhóm</string>
+    <string name="budget_limit_short">Hạn mức</string>
+    <string name="budget_edit_multi_title">Nhập hạn mức từng nhóm</string>
+    <string name="budget_edit_multi_sub">Áp dụng cho tháng đang xem trên màn Ngân sách. Có thể chỉnh từng dòng hoặc nhập một số rồi «Áp dụng cho tất cả».</string>
+    <string name="budget_apply_same_label">Áp dụng cùng một hạn mức</string>
+    <string name="budget_apply_same_button">Áp dụng cho tất cả</string>
+    <string name="budget_selection_count">Đã chọn %1$d nhóm</string>
+    <string name="budget_save_batch">Lưu %1$d ngân sách</string>
+    <string name="budget_batch_amount_required">Nhập hạn mức hợp lệ cho tất cả các nhóm (số &gt; 0)</string>
+    <string name="budget_edit_from_list">Sửa ngân sách</string>
+    <string name="budget_add_new_title">Thêm ngân sách</string>
+
+    <!-- Budget: new strings -->
+    <string name="budget_count_label">%1$d ngân sách</string>
+    <string name="budget_copy_next_month">Copy sang tháng sau</string>
+    <string name="budget_copy_confirm_msg">Sao chép toàn bộ ngân sách tháng này sang tháng sau? Các nhóm đã có ngân sách sẽ không bị ghi đè.</string>
+    <string name="budget_copy_confirm_btn">Copy</string>
+    <string name="budget_copy_from_past">Chỉ có thể copy từ tháng hiện tại hoặc tháng trước</string>
+    <string name="budget_delete_title">Xoá ngân sách</string>
+    <string name="budget_delete_confirm">Bạn có chắc muốn xoá ngân sách \"%1$s\"?</string>
+    <string name="budget_delete_confirm_btn">Xoá</string>
+    <string name="budget_delete_all_month">Xoá tất cả tháng này</string>
+    <string name="budget_delete_all_confirm">Bạn có chắc muốn xoá tất cả ngân sách tháng đang xem? Hành động này không thể hoàn tác.</string>
+    <string name="budget_delete_this">Xoá ngân sách này</string>
+    <string name="budget_delete_this_confirm">Bạn có chắc muốn xoá ngân sách này?</string>
+    <string name="budget_no_future_month">Đang ở tháng hiện tại, không thể tiến thêm</string>
+    <string name="budget_current_status">Tình trạng tháng này</string>
+    <string name="budget_spent_pct">% đã dùng</string>
+    <string name="budget_help_message">Ngân sách giúp bạn kiểm soát chi tiêu theo từng nhóm mỗi tháng.\n\n• Tạo ngân sách cho từng nhóm chi tiêu\n• Theo dõi % đã chi so với hạn mức\n• Cảnh báo khi vượt 80% hạn mức\n• Copy ngân sách sang tháng sau dễ dàng</string>
+    <string name="ok">OK</string>
+    <string name="cancel">Huỷ</string>
 </resources>
