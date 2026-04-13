@@ -20,6 +20,11 @@ import com.financeapp.mobile.databinding.ActivityLoginBinding;
 import com.financeapp.mobile.ui.main.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
+
+import java.util.concurrent.Executor;
+
 /**
  * Màn đăng nhập theo Figma (SpendSmart). Luồng demo: bất kỳ email/mật khẩu không rỗng đều vào app.
  */
@@ -39,6 +44,54 @@ public class LoginActivity extends AppCompatActivity {
         binding.btnLogin.setOnClickListener(v -> attemptLogin());
         binding.forgotPassword.setOnClickListener(v -> handleForgotPassword());
         setupRegisterLink();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        if (mAuth.getCurrentUser() != null) {
+            showBiometricPrompt();
+        }
+    }
+
+    private void showBiometricPrompt() {
+        Executor executor = ContextCompat.getMainExecutor(this);
+        BiometricPrompt biometricPrompt = new BiometricPrompt(LoginActivity.this,
+                executor, new BiometricPrompt.AuthenticationCallback() {
+            @Override
+            public void onAuthenticationError(int errorCode,
+                                              @NonNull CharSequence errString) {
+                super.onAuthenticationError(errorCode, errString);
+                Toast.makeText(getApplicationContext(),
+                        "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
+                // Stay on login screen to allow password fallback
+            }
+
+            @Override
+            public void onAuthenticationSucceeded(
+                    @NonNull BiometricPrompt.AuthenticationResult result) {
+                super.onAuthenticationSucceeded(result);
+                Toast.makeText(getApplicationContext(),
+                        "Authentication succeeded!", Toast.LENGTH_SHORT).show();
+                startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                finish();
+            }
+
+            @Override
+            public void onAuthenticationFailed() {
+                super.onAuthenticationFailed();
+                Toast.makeText(getApplicationContext(), "Authentication failed",
+                        Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
+                .setTitle("Biometric login for Finance App")
+                .setSubtitle("Log in using your biometric credential")
+                .setNegativeButtonText("Use account password")
+                .build();
+
+        biometricPrompt.authenticate(promptInfo);
     }
 
     private void handleForgotPassword() {
