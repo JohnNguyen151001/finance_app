@@ -42,17 +42,23 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void handleForgotPassword() {
+        android.util.Log.d("AUTH_DEBUG", "Forgot Password button clicked!");
         CharSequence email = binding.emailInput.getText();
         if (email == null || email.toString().trim().isEmpty()) {
             Toast.makeText(this, "Please enter your email first to reset password", Toast.LENGTH_SHORT).show();
             return;
         }
+        
+        Toast.makeText(this, "Processing reset request...", Toast.LENGTH_SHORT).show();
+        
         mAuth.sendPasswordResetEmail(email.toString().trim())
                 .addOnCompleteListener(task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(this, "Password reset email sent.", Toast.LENGTH_SHORT).show();
+                        android.util.Log.d("AUTH_DEBUG", "Reset email sent successfully.");
                     } else {
                         Toast.makeText(this, "Failed to send reset email: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        android.util.Log.e("AUTH_DEBUG", "Reset email failed", task.getException());
                     }
                 });
     }
@@ -83,6 +89,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void attemptLogin() {
+        android.util.Log.d("AUTH_DEBUG", "Login button clicked!");
         CharSequence email = binding.emailInput.getText();
         CharSequence pass = binding.passwordInput.getText();
         if (email == null || email.toString().trim().isEmpty()
@@ -91,14 +98,18 @@ public class LoginActivity extends AppCompatActivity {
             return;
         }
 
+        Toast.makeText(this, "Calling Firebase Auth...", Toast.LENGTH_SHORT).show();
+
         mAuth.signInWithEmailAndPassword(email.toString().trim(), pass.toString().trim())
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
                         Toast.makeText(LoginActivity.this, "Login Successful.", Toast.LENGTH_SHORT).show();
+                        android.util.Log.d("AUTH_DEBUG", "Login successful");
                         startActivity(new Intent(LoginActivity.this, MainActivity.class));
                         finish();
                     } else {
-                        Toast.makeText(LoginActivity.this, "Authentication Failed: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(LoginActivity.this, "Authentication Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown"), Toast.LENGTH_LONG).show();
+                        android.util.Log.e("AUTH_DEBUG", "Login failed", task.getException());
                     }
                 });
     }
