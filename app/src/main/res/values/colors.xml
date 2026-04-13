@@ -1,8 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="seed">#0D9488</color>
-    <color name="md_theme_light_primary">#006A62</color>
+    <color name="white">#FFFFFF</color>
+    <!-- Figma SpendSmart / html.to.design — primary #1cb072 -->
+    <color name="spend_green">#1CB072</color>
+    <color name="spend_green_dark">#159560</color>
+    <color name="spend_green_light">#4CD399</color>
+    <color name="spend_green_overlay">#40FFFFFF</color>
+
+    <color name="text_primary">#1A1A1A</color>
+    <color name="text_secondary">#6B6B6B</color>
+    <color name="text_hint">#BDBDBD</color>
+    <color name="text_muted">#9E9E9E</color>
+    <color name="divider">#EBEBEB</color>
+    <color name="input_fill">#F5F5F5</color>
+    <color name="surface_page">#FFFFFF</color>
+    <color name="surface_muted">#F7F7F7</color>
+    <color name="label_caption">#AAAAAA</color>
+
+    <color name="expense_red">#E53935</color>
+    <color name="google_icon_bg">#FEE2E2</color>
+    <color name="apple_icon_bg">#DBEAFE</color>
+    <color name="promo_card_green">#0F9A68</color>
+    <color name="badge_red">#E53935</color>
+
+    <color name="bottom_nav_indicator">#331CB072</color>
+    <color name="bottom_nav_ripple">#401CB072</color>
+
+    <color name="md_theme_light_primary">@color/spend_green</color>
     <color name="md_theme_light_onPrimary">#FFFFFF</color>
-    <color name="md_theme_light_surface">#F5FBF9</color>
-    <color name="md_theme_light_onSurface">#161D1C</color>
+    <color name="md_theme_light_surface">@color/surface_page</color>
+    <color name="md_theme_light_onSurface">@color/text_primary</color>
 </resources>
