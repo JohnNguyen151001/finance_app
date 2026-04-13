@@ -80,9 +80,7 @@ public class RegisterActivity extends AppCompatActivity {
                         db.collection("users").document(userId)
                                 .set(userMap)
                                 .addOnSuccessListener(aVoid -> {
-                                    Toast.makeText(RegisterActivity.this, "Registration Successful.", Toast.LENGTH_SHORT).show();
-                                    startActivity(new Intent(RegisterActivity.this, MainActivity.class));
-                                    finishAffinity();
+                                    sendVerificationEmail();
                                 })
                                 .addOnFailureListener(e -> {
                                     Toast.makeText(RegisterActivity.this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
@@ -91,6 +89,30 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(RegisterActivity.this, "Registration Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void sendVerificationEmail() {
+        if (mAuth.getCurrentUser() != null) {
+            mAuth.getCurrentUser().sendEmailVerification()
+                    .addOnCompleteListener(task -> {
+                        if (task.isSuccessful()) {
+                            Toast.makeText(RegisterActivity.this,
+                                    "Registration Successful! Please check your email for a verification link.",
+                                    Toast.LENGTH_LONG).show();
+                            
+                            // Log out to force them to sign in after verification
+                            mAuth.signOut();
+                            
+                            // Send back to Login
+                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(RegisterActivity.this,
+                                    "Failed to send verification email.",
+                                    Toast.LENGTH_SHORT).show();
+                        }
+                    });
+        }
     }
 
     @Override

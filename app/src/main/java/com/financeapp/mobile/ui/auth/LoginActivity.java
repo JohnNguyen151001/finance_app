@@ -50,7 +50,12 @@ public class LoginActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
         if (mAuth.getCurrentUser() != null) {
-            showBiometricPrompt();
+            if (mAuth.getCurrentUser().isEmailVerified()) {
+                showBiometricPrompt();
+            } else {
+                Toast.makeText(this, "Please verify your email to continue", Toast.LENGTH_SHORT).show();
+                mAuth.signOut();
+            }
         }
     }
 
@@ -156,10 +161,15 @@ public class LoginActivity extends AppCompatActivity {
         mAuth.signInWithEmailAndPassword(email.toString().trim(), pass.toString().trim())
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful()) {
-                        Toast.makeText(LoginActivity.this, "Login Successful.", Toast.LENGTH_SHORT).show();
-                        android.util.Log.d("AUTH_DEBUG", "Login successful");
-                        startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                        finish();
+                        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+                            Toast.makeText(LoginActivity.this, "Login Successful.", Toast.LENGTH_SHORT).show();
+                            android.util.Log.d("AUTH_DEBUG", "Login successful");
+                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
+                        } else {
+                            Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
+                            mAuth.signOut();
+                        }
                     } else {
                         Toast.makeText(LoginActivity.this, "Authentication Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown"), Toast.LENGTH_LONG).show();
                         android.util.Log.e("AUTH_DEBUG", "Login failed", task.getException());
