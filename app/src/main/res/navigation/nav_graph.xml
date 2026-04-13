@@ -12,22 +12,16 @@
         tools:layout="@layout/fragment_home" />
 
     <fragment
-        android:id="@+id/nav_wallet"
-        android:name="com.financeapp.mobile.ui.wallet.WalletFragment"
-        android:label="@string/nav_wallet"
-        tools:layout="@layout/fragment_wallet" />
-
-    <fragment
-        android:id="@+id/nav_transaction"
+        android:id="@+id/nav_ledger"
         android:name="com.financeapp.mobile.ui.transaction.TransactionFragment"
-        android:label="@string/nav_transaction"
+        android:label="@string/nav_ledger"
         tools:layout="@layout/fragment_transaction" />
 
     <fragment
-        android:id="@+id/nav_report"
-        android:name="com.financeapp.mobile.ui.report.ReportFragment"
-        android:label="@string/nav_report"
-        tools:layout="@layout/fragment_report" />
+        android:id="@+id/nav_add_transaction"
+        android:name="com.financeapp.mobile.ui.add.AddTransactionFragment"
+        android:label="@string/add_title"
+        tools:layout="@layout/fragment_add_transaction" />
 
     <fragment
         android:id="@+id/nav_budget"
@@ -35,4 +29,52 @@
         android:label="@string/nav_budget"
         tools:layout="@layout/fragment_budget" />
 
+    <fragment
+        android:id="@+id/nav_profile"
+        android:name="com.financeapp.mobile.ui.profile.ProfileFragment"
+        android:label="@string/nav_profile"
+        tools:layout="@layout/fragment_profile" />
+
+    <fragment
+        android:id="@+id/nav_wallet"
+        android:name="com.financeapp.mobile.ui.wallet.WalletFragment"
+        android:label="@string/wallet_title"
+        tools:layout="@layout/fragment_wallet" />
+
+    <fragment
+        android:id="@+id/nav_report"
+        android:name="com.financeapp.mobile.ui.report.ReportFragment"
+        android:label="@string/report_title"
+        tools:layout="@layout/fragment_report" />
+
+    <fragment
+        android:id="@+id/nav_budget_select_group"
+        android:name="com.financeapp.mobile.ui.budget.BudgetGroupSelectFragment"
+        android:label="@string/budget_select_group_title"
+        tools:layout="@layout/fragment_budget_select_group" />
+
+    <fragment
+        android:id="@+id/nav_category"
+        android:name="com.financeapp.mobile.ui.category.CategoryFragment"
+        android:label="@string/category_title"
+        tools:layout="@layout/fragment_category" />
+
+    <fragment
+        android:id="@+id/nav_budget_edit"
+        android:name="com.financeapp.mobile.ui.budget.BudgetEditFragment"
+        android:label="@string/budget_edit_title"
+        tools:layout="@layout/fragment_budget_edit">
+        <argument
+            android:name="categoryId"
+            android:defaultValue="-1L"
+            app:argType="long" />
+        <argument
+            android:name="budgetId"
+            android:defaultValue="-1L"
+            app:argType="long" />
+        <argument
+            android:name="categoryIds"
+            app:argType="long[]"
+            app:nullable="true" />
+    </fragment>
 </navigation>
