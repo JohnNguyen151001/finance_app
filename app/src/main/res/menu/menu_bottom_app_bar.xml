@@ -2,22 +2,22 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
     <item
         android:id="@+id/nav_home"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_home"
         android:title="@string/nav_home" />
     <item
         android:id="@+id/nav_ledger"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_ledger"
-        android:title="@string/nav_ledger" />
-    <item
-        android:id="@+id/nav_add_transaction"
-        android:icon="@drawable/ic_nav_add"
-        android:title="@string/nav_add" />
+        android:title="@string/nav_ledger_short" />
     <item
         android:id="@+id/nav_budget"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_budget"
         android:title="@string/nav_budget" />
     <item
         android:id="@+id/nav_profile"
+        android:checkable="true"
         android:icon="@drawable/ic_nav_profile"
         android:title="@string/nav_profile" />
 </menu>

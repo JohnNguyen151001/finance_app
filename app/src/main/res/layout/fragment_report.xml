@@ -1,13 +1,118 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:padding="16dp">
+    android:background="@color/surface_muted"
+    android:orientation="vertical">
 
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/nav_report"
-        android:textAppearance="?attr/textAppearanceHeadlineSmall" />
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/toolbar_report"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/spend_green"
+        app:navigationIcon="@drawable/ic_arrow_back_white"
+        app:subtitle="@string/report_back_home"
+        app:subtitleTextColor="#E6FFFFFF"
+        app:title="@string/report_title"
+        app:titleTextColor="@color/white" />
 
-</FrameLayout>
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:clipToPadding="false"
+        android:fillViewport="true"
+        android:paddingBottom="24dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:cardBackgroundColor="@color/surface_page"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
+
+                <TextView
+                    android:id="@+id/text_report_category"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:drawableEnd="@drawable/ic_expand_more"
+                    android:drawablePadding="8dp"
+                    android:focusable="true"
+                    android:fontFamily="sans-serif-medium"
+                    android:padding="16dp"
+                    android:text="@string/report_category_hint"
+                    android:textColor="@color/text_primary"
+                    android:textSize="15sp" />
+            </com.google.android.material.card.MaterialCardView>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardBackgroundColor="@color/surface_page"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="0dp"
+                app:strokeColor="@color/divider"
+                app:strokeWidth="1dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="12dp">
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingBottom="4dp"
+                        android:text="@string/home_monthly_report"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <com.github.mikephil.charting.charts.LineChart
+                        android:id="@+id/chart_report_line"
+                        android:layout_width="match_parent"
+                        android:layout_height="168dp" />
+
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="8dp"
+                        android:fontFamily="sans-serif-medium"
+                        android:paddingBottom="4dp"
+                        android:text="@string/ledger_expense"
+                        android:textColor="@color/text_secondary"
+                        android:textSize="12sp" />
+
+                    <com.github.mikephil.charting.charts.BarChart
+                        android:id="@+id/chart_report_bar"
+                        android:layout_width="match_parent"
+                        android:layout_height="152dp" />
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:id="@+id/text_report_total"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="16dp"
+                android:fontFamily="sans-serif-black"
+                android:gravity="center"
+                android:textColor="@color/expense_red"
+                android:textSize="26sp"
+                tools:text="-120,000 đ" />
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</LinearLayout>
