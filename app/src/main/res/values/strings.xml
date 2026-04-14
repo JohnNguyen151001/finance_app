@@ -24,6 +24,14 @@
     <string name="login_fill_both">Vui lòng nhập email và mật khẩu.</string>
 
     <string name="home_total_balance">Tổng số dư ⓘ</string>
+    <string name="home_sync_hint">Dữ liệu cập nhật theo ví và giao dịch trên thiết bị.</string>
+    <string name="home_sync_updated">Đã làm mới dữ liệu.</string>
+    <string name="home_cd_search">Tìm kiếm</string>
+    <string name="home_cd_notifications">Thông báo</string>
+    <string name="home_search_placeholder">Tìm kiếm (sắp có)</string>
+    <string name="home_notifications_placeholder">Thông báo (sắp có)</string>
+    <string name="home_cd_period_week">Chi tiêu nhiều nhất theo tuần</string>
+    <string name="home_cd_period_month">Chi tiêu nhiều nhất theo tháng</string>
     <string name="home_my_wallets">Ví của tôi</string>
     <string name="home_see_all">Xem tất cả</string>
     <string name="home_premium_title">Bạn đã tận hưởng Premium hết chưa?</string>
@@ -37,6 +45,15 @@
     <string name="home_tab_week">Tuần</string>
     <string name="home_tab_month">Tháng</string>
     <string name="home_recent">Giao dịch gần đây</string>
+    <string name="home_budget_card_title">Ngân sách tháng này</string>
+    <string name="home_budget_card_cd">Tổng quan ngân sách tháng này</string>
+    <string name="home_budget_empty_primary">Chưa có ngân sách</string>
+    <string name="home_budget_empty_secondary">Thiết lập hạn mức theo nhóm để kiểm soát chi tiêu.</string>
+    <string name="home_budget_used_pct">Đã dùng %1$d%%</string>
+    <string name="home_budget_sub_spent_limit">%1$s / %2$s</string>
+    <string name="home_budget_at_risk">%1$d nhóm từ 80%% hạn mức trở lên</string>
+    <string name="home_budget_cta_create">Tạo ngân sách</string>
+    <string name="home_budget_cta_details">Xem chi tiết</string>
 
     <string name="ledger_title">Sổ Giao Dịch</string>
     <string name="ledger_tab_this_month">Tháng này</string>
@@ -74,6 +91,14 @@
     <string name="budget_days_suffix">ngày</string>
     <string name="budget_create">Tạo Ngân sách</string>
     <string name="budget_today">Hôm nay</string>
+    <string name="budget_month_prev_cd">Tháng trước</string>
+    <string name="budget_month_next_cd">Tháng sau</string>
+    <string name="budget_month_next_cd_disabled">Không thể xem tháng sau</string>
+    <string name="budget_gauge_caption">%1$s đã chi · %2$s hạn mức</string>
+    <string name="budget_snackbar_deleted_one">Đã xóa ngân sách.</string>
+    <string name="budget_snackbar_deleted_all">Đã xóa tất cả ngân sách tháng này.</string>
+    <string name="budget_warning_badge_cd">Cảnh báo gần hoặc vượt hạn mức</string>
+    <string name="budget_pct_used_line">%1$d%% đã chi</string>
     <string name="budget_more">Thêm tùy chọn</string>
     <string name="budget_help">Trợ giúp</string>
     <string name="budget_add_flow_title">Thêm ngân sách</string>
@@ -133,6 +158,8 @@
     <string name="budget_copy_confirm_msg">Sao chép toàn bộ ngân sách tháng này sang tháng sau? Các nhóm đã có ngân sách sẽ không bị ghi đè.</string>
     <string name="budget_copy_confirm_btn">Copy</string>
     <string name="budget_copy_from_past">Chỉ có thể copy từ tháng hiện tại hoặc tháng trước</string>
+    <string name="budget_copy_toast_ok">Đã copy %1$d ngân sách sang %2$s</string>
+    <string name="budget_copy_toast_skip">%1$s: không có mục mới để copy (tháng đích đã đủ hoặc tháng nguồn trống)</string>
     <string name="budget_delete_title">Xoá ngân sách</string>
     <string name="budget_delete_confirm">Bạn có chắc muốn xoá ngân sách \"%1$s\"?</string>
     <string name="budget_delete_confirm_btn">Xoá</string>
@@ -143,7 +170,38 @@
     <string name="budget_no_future_month">Đang ở tháng hiện tại, không thể tiến thêm</string>
     <string name="budget_current_status">Tình trạng tháng này</string>
     <string name="budget_spent_pct">% đã dùng</string>
-    <string name="budget_help_message">Ngân sách giúp bạn kiểm soát chi tiêu theo từng nhóm mỗi tháng.\n\n• Tạo ngân sách cho từng nhóm chi tiêu\n• Theo dõi % đã chi so với hạn mức\n• Cảnh báo khi vượt 80% hạn mức\n• Copy ngân sách sang tháng sau dễ dàng</string>
+    <string name="budget_help_message" formatted="false">Ngân sách giúp bạn kiểm soát chi tiêu theo từng nhóm mỗi tháng.\n\n• Tạo ngân sách cho từng nhóm chi tiêu\n• Theo dõi % đã chi so với hạn mức\n• Cảnh báo khi vượt 80% hạn mức\n• Copy ngân sách sang tháng sau dễ dàng</string>
     <string name="ok">OK</string>
     <string name="cancel">Huỷ</string>
+
+    <!-- Spending challenges (Ngân sách + Tổng quan) -->
+    <string name="challenge_section_title">Thử thách chi tiêu</string>
+    <string name="challenge_create">Thêm</string>
+    <string name="challenge_empty_hint">Tạo thử thách để theo dõi streak, hạn mức 7 ngày hoặc mục tiêu tháng.</string>
+    <string name="challenge_no_spend_title">Ngày không chi tiêu</string>
+    <string name="challenge_no_spend_sub">%1$d ngày liên tiếp không chi · Kỷ lục %2$d</string>
+    <string name="challenge_beat_month_title">Chi ít hơn tháng trước</string>
+    <string name="challenge_beat_month_sub_winning">Tháng này %1$s · Tháng trước %2$s — đang tốt hơn.</string>
+    <string name="challenge_beat_month_sub_losing">Tháng này %1$s · Tháng trước %2$s — cần tiết giảm thêm.</string>
+    <string name="challenge_weekly_title">Hạn mức 7 ngày</string>
+    <string name="challenge_weekly_sub">Đã chi %1$s / mục tiêu %2$s</string>
+    <string name="challenge_budget_perfect_title">Giữ tất cả nhóm trong hạn mức</string>
+    <string name="challenge_budget_perfect_sub">%1$d / %2$d nhóm chưa vượt hạn mức</string>
+    <string name="challenge_budget_perfect_sub_empty">Chưa có ngân sách — thêm ngân sách để dùng thử thách này.</string>
+    <string name="challenge_achieved">Đã đạt mục tiêu</string>
+    <string name="challenge_type_prompt">Chọn loại thử thách</string>
+    <string name="challenge_weekly_amount_hint">Mục tiêu chi tối đa 7 ngày (đ)</string>
+    <string name="challenge_home_cta">Bắt đầu thử thách từ màn Ngân sách</string>
+    <string name="challenge_home_title">Thử thách</string>
+    <string name="challenge_deleted">Đã xóa thử thách.</string>
+    <string name="challenge_max_active">Tối đa 3 thử thách đang bật.</string>
+    <string name="challenge_created">Đã tạo thử thách.</string>
+    <string name="challenge_weekly_invalid">Nhập mục tiêu lớn hơn 0 cho hạn mức 7 ngày.</string>
+    <string name="challenge_dialog_positive">Tạo</string>
+    <string name="challenge_type_no_spend">Ngày không chi (streak)</string>
+    <string name="challenge_type_beat_last">Chi ít hơn tháng trước</string>
+    <string name="challenge_type_weekly">Hạn mức chi 7 ngày</string>
+    <string name="challenge_type_budget_perfect">Không vượt hạn nhóm</string>
+    <string name="challenge_cd_delete">Xóa thử thách</string>
+    <string name="challenge_cd_card">Mở màn Ngân sách và thử thách</string>
 </resources>
