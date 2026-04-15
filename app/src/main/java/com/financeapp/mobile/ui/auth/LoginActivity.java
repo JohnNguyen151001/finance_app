@@ -51,7 +51,14 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         if (mAuth.getCurrentUser() != null) {
             if (mAuth.getCurrentUser().isEmailVerified()) {
-                showBiometricPrompt();
+                androidx.biometric.BiometricManager biometricManager = androidx.biometric.BiometricManager.from(this);
+                if (biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG) 
+                        == androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS) {
+                    showBiometricPrompt();
+                } else {
+                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                    finish();
+                }
             } else {
                 Toast.makeText(this, "Please verify your email to continue", Toast.LENGTH_SHORT).show();
                 mAuth.signOut();
