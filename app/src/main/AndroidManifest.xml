@@ -1,6 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.USE_BIOMETRIC" />
+
     <application
         android:name=".FinanceApp"
         android:allowBackup="true"
@@ -22,9 +25,16 @@
         </activity>
 
         <activity
+            android:name=".ui.auth.RegisterActivity"
+            android:exported="false"
+            android:theme="@style/Theme.FinanceApp.Login"
+            android:windowSoftInputMode="adjustResize" />
+
+        <activity
             android:name=".ui.main.MainActivity"
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
+
     </application>
 
 </manifest>

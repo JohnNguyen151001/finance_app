@@ -204,4 +204,51 @@
     <string name="challenge_type_budget_perfect">Không vượt hạn nhóm</string>
     <string name="challenge_cd_delete">Xóa thử thách</string>
     <string name="challenge_cd_card">Mở màn Ngân sách và thử thách</string>
+
+    <!-- Auth / Register -->
+    <string name="register_title">Tạo tài khoản mới</string>
+    <string name="register_name_label">Họ và tên</string>
+    <string name="register_name_hint">Nhập họ và tên</string>
+    <string name="register_age_label">Tuổi</string>
+    <string name="register_age_hint">Nhập tuổi</string>
+    <string name="register_phone_label">Số điện thoại</string>
+    <string name="register_phone_hint">Nhập số điện thoại</string>
+    <string name="register_password_hint">Ít nhất 6 ký tự</string>
+    <string name="register_confirm_password_label">Xác nhận mật khẩu</string>
+    <string name="register_confirm_password_hint">Nhập lại mật khẩu</string>
+    <string name="register_btn">Đăng ký</string>
+    <string name="register_back_to_login">Đã có tài khoản? Đăng nhập</string>
+    <string name="register_fill_all">Vui lòng điền đầy đủ thông tin</string>
+    <string name="register_invalid_age">Tuổi không hợp lệ</string>
+    <string name="register_password_mismatch">Mật khẩu xác nhận không khớp</string>
+    <string name="register_password_too_short">Mật khẩu phải có ít nhất 6 ký tự</string>
+    <string name="register_failed">Đăng ký thất bại</string>
+    <string name="register_save_failed">Lưu thông tin thất bại: %1$s</string>
+    <string name="register_success_verify">Đăng ký thành công! Vui lòng kiểm tra email để xác thực.</string>
+    <string name="register_verify_failed">Gửi email xác thực thất bại</string>
+
+    <!-- Auth messages -->
+    <string name="auth_verify_email">Vui lòng xác thực email trước khi đăng nhập</string>
+    <string name="auth_login_failed">Đăng nhập thất bại</string>
+    <string name="auth_enter_email_first">Vui lòng nhập email trước</string>
+    <string name="auth_reset_sent">Đã gửi email đặt lại mật khẩu</string>
+    <string name="auth_reset_failed">Gửi email thất bại</string>
+    <string name="auth_biometric_title">Đăng nhập nhanh</string>
+    <string name="auth_biometric_subtitle">Sử dụng vân tay / khuôn mặt để vào app</string>
+    <string name="auth_use_password">Dùng mật khẩu</string>
+    <string name="auth_biometric_failed">Xác thực sinh trắc thất bại</string>
+
+    <!-- Wallet -->
+    <string name="wallet_add">Thêm ví</string>
+    <string name="wallet_name_label">Tên ví</string>
+    <string name="wallet_name_hint">VD: Ví tiền mặt, Techcombank…</string>
+    <string name="wallet_name_required">Tên ví không được để trống</string>
+    <string name="wallet_type_label">Loại ví</string>
+    <string name="wallet_balance_label">Số dư ban đầu</string>
+    <string name="wallet_balance_hint">0</string>
+    <string name="wallet_save">Lưu ví</string>
+    <string name="wallet_created">Tạo ví thành công</string>
+
+    <!-- Profile -->
+    <string name="profile_load_failed">Không thể tải thông tin tài khoản</string>
 </resources>

@@ -1,5 +1,6 @@
 plugins {
     id 'com.android.application'
+    id 'com.google.gms.google-services'
 }
 
 android {
@@ -54,6 +55,13 @@ dependencies {
     annotationProcessor "androidx.room:room-compiler:$roomVersion"
 
     implementation 'com.github.PhilJay:MPAndroidChart:v3.1.0'
+
+    // Firebase (BOM tự đồng bộ version)
+    implementation platform('com.google.firebase:firebase-bom:32.8.0')
+    implementation 'com.google.firebase:firebase-auth'
+
+    // Biometric
+    implementation 'androidx.biometric:biometric:1.1.0'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'
