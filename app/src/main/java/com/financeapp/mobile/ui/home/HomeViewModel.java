@@ -30,6 +30,8 @@ import com.financeapp.mobile.ui.chart.ChartPoint;
 import com.financeapp.mobile.ui.format.DateDisplayUtils;
 import com.financeapp.mobile.ui.format.MoneyUtils;
 import com.financeapp.mobile.ui.home.model.HomeUiModel;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -92,8 +94,14 @@ public class HomeViewModel extends AndroidViewModel {
         });
     }
 
+    private static String uidOrEmpty() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        return u != null ? u.getUid() : "";
+    }
+
     private HomeUiModel buildModel() {
-        List<WalletEntity> wallets = walletRepository.getWallets();
+        String uid = uidOrEmpty();
+        List<WalletEntity> wallets = walletRepository.getWallets(uid);
         double total = 0;
         for (WalletEntity w : wallets) {
             total += w.balance;
@@ -109,7 +117,7 @@ public class HomeViewModel extends AndroidViewModel {
         monthStart.set(Calendar.SECOND, 0);
         monthStart.set(Calendar.MILLISECOND, 0);
 
-        List<TransactionEntity> monthTx = transactionRepository.getBetween(from, to);
+        List<TransactionEntity> monthTx = transactionRepository.getBetween(uid, from, to);
         double expenseSum = 0;
         double incomeSum = 0;
         for (TransactionEntity t : monthTx) {
@@ -157,7 +165,7 @@ public class HomeViewModel extends AndroidViewModel {
             count++;
         }
 
-        List<TransactionEntity> recentEntities = transactionRepository.getRecent(8);
+        List<TransactionEntity> recentEntities = transactionRepository.getRecent(uid, 8);
         List<HomeUiModel.RecentRow> recent = new ArrayList<>();
         for (TransactionEntity t : recentEntities) {
             CategoryEntity cat = categoryRepository.getById(t.categoryId);
@@ -208,21 +216,23 @@ public class HomeViewModel extends AndroidViewModel {
     @Nullable
     private HomeUiModel.ChallengeSnippet buildTopChallengeSnippet(
             long rangeFrom, long rangeToExclusive, List<TransactionEntity> monthTx) {
-        List<ChallengeEntity> active = challengeDao.getActive();
+        String uid = uidOrEmpty();
+        List<ChallengeEntity> active = challengeDao.getActiveForUser(uid);
         if (active.isEmpty()) {
             return null;
         }
         long lastFrom = BudgetMonthUtils.monthStartMillisForOffset(-1);
         long lastTo = BudgetMonthUtils.monthEndExclusiveMillisForOffset(-1);
-        List<TransactionEntity> lastMonthTx = transactionRepository.getBetween(lastFrom, lastTo);
+        List<TransactionEntity> lastMonthTx = transactionRepository.getBetween(uid, lastFrom, lastTo);
         long now = System.currentTimeMillis();
-        List<TransactionEntity> weekTx = transactionRepository.getBetween(now - 7L * 86_400_000L, now + 1);
+        List<TransactionEntity> weekTx = transactionRepository.getBetween(uid, now - 7L * 86_400_000L, now + 1);
         String monthKey = BudgetMonthUtils.monthKeyForOffset(0);
-        List<BudgetEntity> budgets = budgetRepository.getForMonth(monthKey);
+        List<BudgetEntity> budgets = budgetRepository.getForMonth(uid, monthKey);
 
         for (ChallengeEngine.Progress p : ChallengeEngine.evaluate(
                 getApplication(),
                 0,
+                uid,
                 active,
                 monthTx,
                 lastMonthTx,
@@ -241,10 +251,11 @@ public class HomeViewModel extends AndroidViewModel {
                 }
             }
         }
-        active = challengeDao.getActive();
+        active = challengeDao.getActiveForUser(uid);
         List<ChallengeEngine.Progress> prog = ChallengeEngine.evaluate(
                 getApplication(),
                 0,
+                uid,
                 active,
                 monthTx,
                 lastMonthTx,
@@ -269,8 +280,9 @@ public class HomeViewModel extends AndroidViewModel {
     }
 
     private HomeUiModel.HomeBudgetOverview buildBudgetOverview(long rangeFrom, long rangeToExclusive) {
+        String uid = uidOrEmpty();
         String monthKey = BudgetMonthUtils.monthKeyForOffset(0);
-        List<BudgetEntity> budgets = budgetRepository.getForMonth(monthKey);
+        List<BudgetEntity> budgets = budgetRepository.getForMonth(uid, monthKey);
         if (budgets.isEmpty()) {
             return new HomeUiModel.HomeBudgetOverview(
                     true,
@@ -287,7 +299,7 @@ public class HomeViewModel extends AndroidViewModel {
         for (BudgetEntity b : budgets) {
             totalLimit += b.limitAmount;
             double spent = transactionRepository.sumBudgetOutgoingForCategoryBetween(
-                    b.categoryId, rangeFrom, rangeToExclusive);
+                    uid, b.categoryId, rangeFrom, rangeToExclusive);
             totalSpent += spent;
             if (b.limitAmount > 0) {
                 double ratio = spent / b.limitAmount;

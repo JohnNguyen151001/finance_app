@@ -21,6 +21,8 @@ import com.financeapp.mobile.FinanceApp;
 import com.financeapp.mobile.data.local.entity.CategoryEntity;
 import com.financeapp.mobile.data.repository.CategoryRepository;
 import com.financeapp.mobile.databinding.FragmentBudgetSelectGroupBinding;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -104,7 +106,9 @@ public class BudgetGroupSelectFragment extends Fragment {
 
     private void loadCategories() {
         ((FinanceApp) requireActivity().getApplication()).databaseIo().execute(() -> {
-            List<CategoryEntity> list = categoryRepository.getByKind("EXPENSE");
+            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = u != null ? u.getUid() : "";
+            List<CategoryEntity> list = categoryRepository.getByKind(uid, "EXPENSE");
             requireActivity().runOnUiThread(() -> {
                 if (binding == null) return;
                 all.clear();

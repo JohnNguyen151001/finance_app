@@ -27,6 +27,8 @@ import com.financeapp.mobile.ui.budget.model.BudgetRow;
 import com.financeapp.mobile.ui.budget.model.BudgetSummary;
 import com.financeapp.mobile.ui.format.MoneyUtils;
 import com.financeapp.mobile.ui.util.Event;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -63,6 +65,11 @@ public class BudgetViewModel extends AndroidViewModel {
     private int monthOffset = 0;
 
     private final Handler mainHandler = new Handler(Looper.getMainLooper());
+
+    private static String uidOrEmpty() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        return u != null ? u.getUid() : "";
+    }
 
     public BudgetViewModel(@NonNull Application application) {
         super(application);
@@ -103,7 +110,8 @@ public class BudgetViewModel extends AndroidViewModel {
 
     public void createChallenge(@NonNull String typeName, @Nullable String weeklyAmountText) {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
-            if (challengeDao.countActive() >= MAX_ACTIVE_CHALLENGES) {
+            String uid = uidOrEmpty();
+            if (challengeDao.countActiveForUser(uid) >= MAX_ACTIVE_CHALLENGES) {
                 snackbarEvent.postValue(new Event<>(getApplication().getString(R.string.challenge_max_active)));
                 return;
             }
@@ -140,6 +148,7 @@ public class BudgetViewModel extends AndroidViewModel {
                 return;
             }
             ChallengeEntity c = new ChallengeEntity();
+            c.userId = uid;
             c.type = t.name();
             c.targetValue = t == ChallengeEngine.Type.WEEKLY_LIMIT ? weeklyTarget : 0;
             c.bestStreak = 0;
@@ -192,7 +201,7 @@ public class BudgetViewModel extends AndroidViewModel {
     public void deleteAllBudgetsForCurrentMonth() {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
             String key = BudgetMonthUtils.monthKeyForOffset(monthOffset);
-            budgetRepository.deleteForMonth(key);
+            budgetRepository.deleteForMonth(uidOrEmpty(), key);
             refreshSync();
             snackbarEvent.postValue(new Event<>(
                     getApplication().getString(R.string.budget_snackbar_deleted_all)));
@@ -246,10 +255,11 @@ public class BudgetViewModel extends AndroidViewModel {
         isLoading.postValue(true);
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
             try {
+                String uid = uidOrEmpty();
                 String currentKey = BudgetMonthUtils.monthKeyForOffset(monthOffset);
                 String nextKey = BudgetMonthUtils.monthKeyForOffset(monthOffset + 1);
-                List<BudgetEntity> current = budgetRepository.getForMonth(currentKey);
-                List<BudgetEntity> nextExisting = budgetRepository.getForMonth(nextKey);
+                List<BudgetEntity> current = budgetRepository.getForMonth(uid, currentKey);
+                List<BudgetEntity> nextExisting = budgetRepository.getForMonth(uid, nextKey);
 
                 int copied = 0;
                 for (BudgetEntity src : current) {
@@ -262,6 +272,7 @@ public class BudgetViewModel extends AndroidViewModel {
                     }
                     if (!alreadyExists) {
                         BudgetEntity copy = new BudgetEntity();
+                        copy.userId = uid;
                         copy.monthKey = nextKey;
                         copy.categoryId = src.categoryId;
                         copy.limitAmount = src.limitAmount;
@@ -289,13 +300,15 @@ public class BudgetViewModel extends AndroidViewModel {
     }
 
     private void upsertBudgetSync(long categoryId, double limitAmount) {
+        String uid = uidOrEmpty();
         String monthKey = BudgetMonthUtils.monthKeyForOffset(monthOffset);
-        BudgetEntity existing = budgetRepository.getByMonthAndCategory(monthKey, categoryId);
+        BudgetEntity existing = budgetRepository.getByMonthAndCategory(uid, monthKey, categoryId);
         if (existing != null) {
             existing.limitAmount = limitAmount;
             budgetRepository.update(existing);
         } else {
             BudgetEntity b = new BudgetEntity();
+            b.userId = uid;
             b.monthKey = monthKey;
             b.categoryId = categoryId;
             b.limitAmount = limitAmount;
@@ -313,13 +326,14 @@ public class BudgetViewModel extends AndroidViewModel {
     }
 
     private void refreshSync() {
+        String uid = uidOrEmpty();
         String monthKey = BudgetMonthUtils.monthKeyForOffset(monthOffset);
         long rangeFrom = BudgetMonthUtils.monthStartMillisForOffset(monthOffset);
         long rangeToExclusive = BudgetMonthUtils.monthEndExclusiveMillisForOffset(monthOffset);
 
         monthLabel.postValue(BudgetMonthUtils.monthLabelForOffset(monthOffset));
 
-        List<BudgetEntity> budgets = budgetRepository.getForMonth(monthKey);
+        List<BudgetEntity> budgets = budgetRepository.getForMonth(uid, monthKey);
         isEmpty.postValue(budgets.isEmpty());
 
         double totalLimit = 0;
@@ -327,7 +341,7 @@ public class BudgetViewModel extends AndroidViewModel {
 
         for (BudgetEntity b : budgets) {
             double spent = transactionRepository.sumBudgetOutgoingForCategoryBetween(
-                    b.categoryId, rangeFrom, rangeToExclusive);
+                    uid, b.categoryId, rangeFrom, rangeToExclusive);
             totalLimit += b.limitAmount;
             totalSpent += spent;
         }
@@ -353,7 +367,7 @@ public class BudgetViewModel extends AndroidViewModel {
         List<BudgetRow> out = new ArrayList<>();
         for (BudgetEntity b : budgets) {
             double spent = transactionRepository.sumBudgetOutgoingForCategoryBetween(
-                    b.categoryId, rangeFrom, rangeToExclusive);
+                    uid, b.categoryId, rangeFrom, rangeToExclusive);
             CategoryEntity cat = categoryRepository.getById(b.categoryId);
             String title = cat != null ? cat.name : "?";
             String icon = cat != null && cat.iconKey != null ? cat.iconKey : "📁";
@@ -385,19 +399,20 @@ public class BudgetViewModel extends AndroidViewModel {
             challenges.postValue(Collections.emptyList());
             return;
         }
-        List<ChallengeEntity> activeChallenges = challengeDao.getActive();
+        List<ChallengeEntity> activeChallenges = challengeDao.getActiveForUser(uid);
         List<TransactionEntity> thisMonthTx =
-                transactionRepository.getBetween(rangeFrom, rangeToExclusive);
+                transactionRepository.getBetween(uid, rangeFrom, rangeToExclusive);
         long lastFrom = BudgetMonthUtils.monthStartMillisForOffset(monthOffset - 1);
         long lastTo = BudgetMonthUtils.monthEndExclusiveMillisForOffset(monthOffset - 1);
-        List<TransactionEntity> lastMonthTx = transactionRepository.getBetween(lastFrom, lastTo);
+        List<TransactionEntity> lastMonthTx = transactionRepository.getBetween(uid, lastFrom, lastTo);
         long now = System.currentTimeMillis();
         long weekFrom = now - 7L * 86_400_000L;
-        List<TransactionEntity> weekTx = transactionRepository.getBetween(weekFrom, now + 1);
+        List<TransactionEntity> weekTx = transactionRepository.getBetween(uid, weekFrom, now + 1);
 
         for (ChallengeEngine.Progress p : ChallengeEngine.evaluate(
                 getApplication(),
                 monthOffset,
+                uid,
                 activeChallenges,
                 thisMonthTx,
                 lastMonthTx,
@@ -416,10 +431,11 @@ public class BudgetViewModel extends AndroidViewModel {
                 }
             }
         }
-        activeChallenges = challengeDao.getActive();
+        activeChallenges = challengeDao.getActiveForUser(uid);
         challenges.postValue(ChallengeEngine.evaluate(
                 getApplication(),
                 monthOffset,
+                uid,
                 activeChallenges,
                 thisMonthTx,
                 lastMonthTx,

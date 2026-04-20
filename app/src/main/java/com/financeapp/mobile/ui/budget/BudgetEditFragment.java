@@ -32,6 +32,8 @@ import com.financeapp.mobile.domain.BudgetMonthUtils;
 import com.financeapp.mobile.databinding.FragmentBudgetEditBinding;
 import com.financeapp.mobile.ui.budget.model.BudgetEditLine;
 import com.financeapp.mobile.ui.format.MoneyUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -201,7 +203,9 @@ public class BudgetEditFragment extends Fragment {
                 int off = budgetViewModel.getMonthOffset();
                 long from = BudgetMonthUtils.monthStartMillisForOffset(off);
                 long toEx = BudgetMonthUtils.monthEndExclusiveMillisForOffset(off);
-                spent = txRepo.sumBudgetOutgoingForCategoryBetween(categoryId, from, toEx);
+                FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+                String uid = u != null ? u.getUid() : "";
+                spent = txRepo.sumBudgetOutgoingForCategoryBetween(uid, categoryId, from, toEx);
             }
             final double finalSpent = spent;
             final BudgetEntity finalExisting = existing;
@@ -235,11 +239,13 @@ public class BudgetEditFragment extends Fragment {
             BudgetRepository budgetRepo = new BudgetRepository(requireActivity().getApplication());
             CategoryRepository catRepo = new CategoryRepository(requireActivity().getApplication());
             String monthKey = budgetViewModel.getCurrentMonthKey();
+            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = u != null ? u.getUid() : "";
 
             List<BudgetEditLine> lines = new ArrayList<>();
             for (long id : ids) {
                 CategoryEntity cat = catRepo.getById(id);
-                BudgetEntity b = budgetRepo.getByMonthAndCategory(monthKey, id);
+                BudgetEntity b = budgetRepo.getByMonthAndCategory(uid, monthKey, id);
                 double pref = b != null ? b.limitAmount : 0;
                 String name = cat != null ? cat.name : "?";
                 String icon = cat != null && cat.iconKey != null ? cat.iconKey : "📁";
