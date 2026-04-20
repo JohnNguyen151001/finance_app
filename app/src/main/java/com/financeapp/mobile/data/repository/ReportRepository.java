@@ -9,7 +9,7 @@ import com.financeapp.mobile.data.local.entity.TransactionEntity;
 import java.util.List;
 
 /**
- * Nhóm 3 — Báo cáo (tổng hợp từ giao dịch; mở rộng thêm cache sau).
+ * Báo cáo (tổng hợp từ giao dịch).
  */
 public class ReportRepository {
 
@@ -19,7 +19,7 @@ public class ReportRepository {
         transactionDao = AppDatabase.getInstance(application).transactionDao();
     }
 
-    public List<TransactionEntity> getTransactionsInRange(long fromMillis, long toMillis) {
-        return transactionDao.getBetween(fromMillis, toMillis);
+    public List<TransactionEntity> getTransactionsInRange(String uid, long fromMillis, long toMillis) {
+        return transactionDao.getBetweenForUser(uid, fromMillis, toMillis);
     }
 }

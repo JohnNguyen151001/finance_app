@@ -5,11 +5,12 @@ import android.app.Application;
 import com.financeapp.mobile.data.local.AppDatabase;
 import com.financeapp.mobile.data.local.dao.TransactionDao;
 import com.financeapp.mobile.data.local.entity.TransactionEntity;
+import com.financeapp.mobile.domain.model.TransactionType;
 
 import java.util.List;
 
 /**
- * Nhóm 2 — Giao dịch.
+ * Giao dịch.
  */
 public class TransactionRepository {
 
@@ -19,11 +20,34 @@ public class TransactionRepository {
         transactionDao = AppDatabase.getInstance(application).transactionDao();
     }
 
-    public List<TransactionEntity> getBetween(long fromMillis, long toMillis) {
-        return transactionDao.getBetween(fromMillis, toMillis);
+    public List<TransactionEntity> getBetween(String uid, long fromMillis, long toMillis) {
+        return transactionDao.getBetweenForUser(uid, fromMillis, toMillis);
+    }
+
+    public List<TransactionEntity> getRecent(String uid, int limit) {
+        return transactionDao.getRecentForUser(uid, limit);
     }
 
     public long insert(TransactionEntity entity) {
         return transactionDao.insert(entity);
+    }
+
+    public double sumExpenseForCategoryBetween(String uid, long categoryId, long fromMillis, long toMillisExclusive) {
+        return transactionDao.sumExpenseForCategoryBetweenForUser(
+                uid,
+                categoryId,
+                TransactionType.EXPENSE.name(),
+                fromMillis,
+                toMillisExclusive);
+    }
+
+    public double sumBudgetOutgoingForCategoryBetween(String uid, long categoryId, long fromMillis, long toMillisExclusive) {
+        return transactionDao.sumBudgetOutgoingForCategoryBetweenForUser(
+                uid,
+                categoryId,
+                TransactionType.EXPENSE.name(),
+                TransactionType.BORROW.name(),
+                fromMillis,
+                toMillisExclusive);
     }
 }

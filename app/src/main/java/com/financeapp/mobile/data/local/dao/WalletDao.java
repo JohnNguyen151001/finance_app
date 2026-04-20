@@ -12,8 +12,8 @@ import java.util.List;
 @Dao
 public interface WalletDao {
 
-    @Query("SELECT * FROM wallets ORDER BY createdAt DESC")
-    List<WalletEntity> getAll();
+    @Query("SELECT * FROM wallets WHERE userId = :uid AND isDeleted = 0 ORDER BY createdAt DESC")
+    List<WalletEntity> getAllForUser(String uid);
 
     @Query("SELECT * FROM wallets WHERE id = :id LIMIT 1")
     WalletEntity getById(long id);
@@ -23,4 +23,7 @@ public interface WalletDao {
 
     @Update
     void update(WalletEntity wallet);
+
+    @Query("UPDATE wallets SET isDeleted = 1 WHERE id = :id")
+    void softDeleteById(long id);
 }
