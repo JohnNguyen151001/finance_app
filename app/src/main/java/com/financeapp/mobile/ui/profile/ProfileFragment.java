@@ -17,7 +17,6 @@ import com.financeapp.mobile.databinding.FragmentProfileBinding;
 import com.financeapp.mobile.ui.auth.LoginActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
-import com.google.firebase.firestore.FirebaseFirestore;
 
 public class ProfileFragment extends Fragment {
 
@@ -43,6 +42,7 @@ public class ProfileFragment extends Fragment {
                 Toast.makeText(requireContext(), R.string.profile_alerts, Toast.LENGTH_SHORT).show());
         binding.rowSettings.setOnClickListener(v ->
                 Toast.makeText(requireContext(), R.string.profile_settings, Toast.LENGTH_SHORT).show());
+
         binding.rowLogout.setOnClickListener(v -> {
             FirebaseAuth.getInstance().signOut();
             Intent i = new Intent(requireContext(), LoginActivity.class);
@@ -55,28 +55,14 @@ public class ProfileFragment extends Fragment {
     }
 
     private void loadUserProfile() {
-        FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        if (currentUser != null) {
-            String uid = currentUser.getUid();
-            String email = currentUser.getEmail();
-            
-            if (email != null) {
-                binding.textProfileEmail.setText(email);
-            }
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        if (user == null || binding == null) return;
 
-            FirebaseFirestore.getInstance().collection("users").document(uid)
-                    .get()
-                    .addOnSuccessListener(documentSnapshot -> {
-                        if (documentSnapshot.exists()) {
-                            String name = documentSnapshot.getString("name");
-                            if (name != null) {
-                                binding.textProfileName.setText(name);
-                            }
-                        }
-                    })
-                    .addOnFailureListener(e -> {
-                        Toast.makeText(requireContext(), "Failed to load user profile", Toast.LENGTH_SHORT).show();
-                    });
+        if (user.getEmail() != null) {
+            binding.textProfileEmail.setText(user.getEmail());
+        }
+        if (user.getDisplayName() != null && !user.getDisplayName().isEmpty()) {
+            binding.textProfileName.setText(user.getDisplayName());
         }
     }
 

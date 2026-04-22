@@ -14,19 +14,19 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.biometric.BiometricManager;
+import androidx.biometric.BiometricPrompt;
+import androidx.core.content.ContextCompat;
 
 import com.financeapp.mobile.R;
 import com.financeapp.mobile.databinding.ActivityLoginBinding;
 import com.financeapp.mobile.ui.main.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
 
-import androidx.biometric.BiometricPrompt;
-import androidx.core.content.ContextCompat;
-
 import java.util.concurrent.Executor;
 
 /**
- * Màn đăng nhập theo Figma (SpendSmart). Luồng demo: bất kỳ email/mật khẩu không rỗng đều vào app.
+ * Đăng nhập bằng Firebase Email/Password + Biometric khi đã có session.
  */
 public class LoginActivity extends AppCompatActivity {
 
@@ -49,84 +49,111 @@ public class LoginActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        if (mAuth.getCurrentUser() != null) {
-            if (mAuth.getCurrentUser().isEmailVerified()) {
-                androidx.biometric.BiometricManager biometricManager = androidx.biometric.BiometricManager.from(this);
-                if (biometricManager.canAuthenticate(androidx.biometric.BiometricManager.Authenticators.BIOMETRIC_STRONG) 
-                        == androidx.biometric.BiometricManager.BIOMETRIC_SUCCESS) {
-                    showBiometricPrompt();
-                } else {
-                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                    finish();
-                }
+        // Nếu đã đăng nhập và đã xác thực email → thử biometric trước
+        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+            BiometricManager biometricManager = BiometricManager.from(this);
+            if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+                    == BiometricManager.BIOMETRIC_SUCCESS) {
+                showBiometricPrompt();
             } else {
-                Toast.makeText(this, "Please verify your email to continue", Toast.LENGTH_SHORT).show();
-                mAuth.signOut();
+                goToMain();
             }
+        } else if (mAuth.getCurrentUser() != null && !mAuth.getCurrentUser().isEmailVerified()) {
+            Toast.makeText(this, R.string.auth_verify_email, Toast.LENGTH_LONG).show();
+            mAuth.signOut();
         }
     }
 
+    // ─── Biometric ───────────────────────────────────────────────────────────
+
     private void showBiometricPrompt() {
         Executor executor = ContextCompat.getMainExecutor(this);
-        BiometricPrompt biometricPrompt = new BiometricPrompt(LoginActivity.this,
-                executor, new BiometricPrompt.AuthenticationCallback() {
-            @Override
-            public void onAuthenticationError(int errorCode,
-                                              @NonNull CharSequence errString) {
-                super.onAuthenticationError(errorCode, errString);
-                Toast.makeText(getApplicationContext(),
-                        "Authentication error: " + errString, Toast.LENGTH_SHORT).show();
-                // Stay on login screen to allow password fallback
-            }
+        BiometricPrompt biometricPrompt = new BiometricPrompt(this, executor,
+                new BiometricPrompt.AuthenticationCallback() {
+                    @Override
+                    public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
+                        super.onAuthenticationError(errorCode, errString);
+                        // Người dùng huỷ → ở lại màn login để nhập mật khẩu
+                    }
 
-            @Override
-            public void onAuthenticationSucceeded(
-                    @NonNull BiometricPrompt.AuthenticationResult result) {
-                super.onAuthenticationSucceeded(result);
-                Toast.makeText(getApplicationContext(),
-                        "Authentication succeeded!", Toast.LENGTH_SHORT).show();
-                startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                finish();
-            }
+                    @Override
+                    public void onAuthenticationSucceeded(@NonNull BiometricPrompt.AuthenticationResult result) {
+                        super.onAuthenticationSucceeded(result);
+                        goToMain();
+                    }
 
-            @Override
-            public void onAuthenticationFailed() {
-                super.onAuthenticationFailed();
-                Toast.makeText(getApplicationContext(), "Authentication failed",
-                        Toast.LENGTH_SHORT).show();
-            }
-        });
+                    @Override
+                    public void onAuthenticationFailed() {
+                        super.onAuthenticationFailed();
+                        Toast.makeText(LoginActivity.this, R.string.auth_biometric_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
 
         BiometricPrompt.PromptInfo promptInfo = new BiometricPrompt.PromptInfo.Builder()
-                .setTitle("Biometric login for Finance App")
-                .setSubtitle("Log in using your biometric credential")
-                .setNegativeButtonText("Use account password")
+                .setTitle(getString(R.string.auth_biometric_title))
+                .setSubtitle(getString(R.string.auth_biometric_subtitle))
+                .setNegativeButtonText(getString(R.string.auth_use_password))
                 .build();
 
         biometricPrompt.authenticate(promptInfo);
     }
 
-    private void handleForgotPassword() {
-        android.util.Log.d("AUTH_DEBUG", "Forgot Password button clicked!");
-        CharSequence email = binding.emailInput.getText();
-        if (email == null || email.toString().trim().isEmpty()) {
-            Toast.makeText(this, "Please enter your email first to reset password", Toast.LENGTH_SHORT).show();
+    // ─── Login ───────────────────────────────────────────────────────────────
+
+    private void attemptLogin() {
+        String email = binding.emailInput.getText() != null
+                ? binding.emailInput.getText().toString().trim() : "";
+        String pass = binding.passwordInput.getText() != null
+                ? binding.passwordInput.getText().toString().trim() : "";
+
+        if (email.isEmpty() || pass.isEmpty()) {
+            Toast.makeText(this, R.string.login_fill_both, Toast.LENGTH_SHORT).show();
             return;
         }
-        
-        Toast.makeText(this, "Processing reset request...", Toast.LENGTH_SHORT).show();
-        
-        mAuth.sendPasswordResetEmail(email.toString().trim())
-                .addOnCompleteListener(task -> {
+
+        binding.btnLogin.setEnabled(false);
+        mAuth.signInWithEmailAndPassword(email, pass)
+                .addOnCompleteListener(this, task -> {
+                    binding.btnLogin.setEnabled(true);
                     if (task.isSuccessful()) {
-                        Toast.makeText(this, "Password reset email sent.", Toast.LENGTH_SHORT).show();
-                        android.util.Log.d("AUTH_DEBUG", "Reset email sent successfully.");
+                        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+                            goToMain();
+                        } else {
+                            Toast.makeText(this, R.string.auth_verify_email, Toast.LENGTH_LONG).show();
+                            mAuth.signOut();
+                        }
                     } else {
-                        Toast.makeText(this, "Failed to send reset email: " + task.getException().getMessage(), Toast.LENGTH_LONG).show();
-                        android.util.Log.e("AUTH_DEBUG", "Reset email failed", task.getException());
+                        String msg = task.getException() != null
+                                ? task.getException().getMessage()
+                                : getString(R.string.auth_login_failed);
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
     }
+
+    // ─── Forgot password ─────────────────────────────────────────────────────
+
+    private void handleForgotPassword() {
+        String email = binding.emailInput.getText() != null
+                ? binding.emailInput.getText().toString().trim() : "";
+        if (email.isEmpty()) {
+            Toast.makeText(this, R.string.auth_enter_email_first, Toast.LENGTH_SHORT).show();
+            return;
+        }
+        mAuth.sendPasswordResetEmail(email)
+                .addOnCompleteListener(task -> {
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, R.string.auth_reset_sent, Toast.LENGTH_SHORT).show();
+                    } else {
+                        String msg = task.getException() != null
+                                ? task.getException().getMessage()
+                                : getString(R.string.auth_reset_failed);
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
+                    }
+                });
+    }
+
+    // ─── Register link ───────────────────────────────────────────────────────
 
     private void setupRegisterLink() {
         String prefix = getString(R.string.login_register_prompt);
@@ -153,35 +180,11 @@ public class LoginActivity extends AppCompatActivity {
         binding.registerPrompt.setHighlightColor(Color.TRANSPARENT);
     }
 
-    private void attemptLogin() {
-        android.util.Log.d("AUTH_DEBUG", "Login button clicked!");
-        CharSequence email = binding.emailInput.getText();
-        CharSequence pass = binding.passwordInput.getText();
-        if (email == null || email.toString().trim().isEmpty()
-                || pass == null || pass.toString().trim().isEmpty()) {
-            Toast.makeText(this, R.string.login_fill_both, Toast.LENGTH_SHORT).show();
-            return;
-        }
+    // ─── Navigation ──────────────────────────────────────────────────────────
 
-        Toast.makeText(this, "Calling Firebase Auth...", Toast.LENGTH_SHORT).show();
-
-        mAuth.signInWithEmailAndPassword(email.toString().trim(), pass.toString().trim())
-                .addOnCompleteListener(this, task -> {
-                    if (task.isSuccessful()) {
-                        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
-                            Toast.makeText(LoginActivity.this, "Login Successful.", Toast.LENGTH_SHORT).show();
-                            android.util.Log.d("AUTH_DEBUG", "Login successful");
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(this, "Please verify your email before logging in.", Toast.LENGTH_LONG).show();
-                            mAuth.signOut();
-                        }
-                    } else {
-                        Toast.makeText(LoginActivity.this, "Authentication Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown"), Toast.LENGTH_LONG).show();
-                        android.util.Log.e("AUTH_DEBUG", "Login failed", task.getException());
-                    }
-                });
+    private void goToMain() {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
     }
 
     @Override

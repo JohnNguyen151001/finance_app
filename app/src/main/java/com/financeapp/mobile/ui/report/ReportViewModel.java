@@ -15,6 +15,8 @@ import com.financeapp.mobile.data.repository.TransactionRepository;
 import com.financeapp.mobile.domain.model.TransactionType;
 import com.financeapp.mobile.ui.chart.ChartPoint;
 import com.financeapp.mobile.ui.format.MoneyUtils;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,8 +41,10 @@ public class ReportViewModel extends AndroidViewModel {
 
     public void refresh() {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
+            FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+            String uid = u != null ? u.getUid() : "";
             long foodCatId = -1;
-            for (CategoryEntity c : categoryRepository.getByKind("EXPENSE")) {
+            for (CategoryEntity c : categoryRepository.getByKind(uid, "EXPENSE")) {
                 if ("Ăn uống".equals(c.name)) {
                     foodCatId = c.id;
                     break;
@@ -63,7 +67,7 @@ public class ReportViewModel extends AndroidViewModel {
             double[] daily = new double[dim + 1];
             double sum = 0;
             if (foodCatId >= 0) {
-                List<TransactionEntity> list = transactionRepository.getBetween(from, to);
+                List<TransactionEntity> list = transactionRepository.getBetween(uid, from, to);
                 Calendar cal = Calendar.getInstance();
                 for (TransactionEntity t : list) {
                     if (t.categoryId != foodCatId) {

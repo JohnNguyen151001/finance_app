@@ -16,5 +16,8 @@ captures/
 *.jks
 *.keystore
 
+# Firebase config — sensitive, không commit public
+google-services.json
+
 # Logs
 *.log

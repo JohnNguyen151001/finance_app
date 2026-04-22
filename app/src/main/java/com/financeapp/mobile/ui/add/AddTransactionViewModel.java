@@ -15,6 +15,8 @@ import com.financeapp.mobile.data.repository.CategoryRepository;
 import com.financeapp.mobile.data.repository.TransactionRepository;
 import com.financeapp.mobile.data.repository.WalletRepository;
 import com.financeapp.mobile.domain.model.TransactionType;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -59,25 +61,34 @@ public class AddTransactionViewModel extends AndroidViewModel {
         saveDone.setValue(null);
     }
 
+    private static String uidOrEmpty() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        return u != null ? u.getUid() : "";
+    }
+
     private void reloadMeta() {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
-            List<WalletEntity> wallets = walletRepository.getWallets();
+            String uid = uidOrEmpty();
+            List<WalletEntity> wallets = walletRepository.getWallets(uid);
             String kind = tab == TAB_INCOME ? "INCOME" : "EXPENSE";
-            List<CategoryEntity> categories = categoryRepository.getByKind(kind);
+            List<CategoryEntity> categories = categoryRepository.getByKind(uid, kind);
             meta.postValue(new FormMeta(wallets, categories));
         });
     }
 
     public void save(long walletId, long categoryId, double amount, String note, long occurredAt) {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
+            String uid = uidOrEmpty();
             TransactionType type = typeForTab();
             TransactionEntity t = new TransactionEntity();
+            t.userId = uid.isEmpty() ? null : uid;
             t.walletId = walletId;
             t.categoryId = categoryId;
             t.amount = amount;
             t.type = type.name();
             t.note = note != null ? note : "";
             t.occurredAt = occurredAt;
+            t.isDeleted = 0;
             transactionRepository.insert(t);
 
             WalletEntity w = walletRepository.getById(walletId);

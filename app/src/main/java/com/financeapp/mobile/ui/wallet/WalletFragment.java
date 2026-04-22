@@ -40,6 +40,7 @@ public class WalletFragment extends Fragment {
         binding.rvWallets.setLayoutManager(new LinearLayoutManager(requireContext()));
         binding.rvWallets.setAdapter(adapter);
 
+        // FAB tạo ví mới
         binding.fabAddWallet.setOnClickListener(v ->
                 Navigation.findNavController(v).navigate(R.id.nav_add_wallet));
 
@@ -49,9 +50,7 @@ public class WalletFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-        if (viewModel != null) {
-            viewModel.refresh();
-        }
+        if (viewModel != null) viewModel.refresh();
     }
 
     @Override

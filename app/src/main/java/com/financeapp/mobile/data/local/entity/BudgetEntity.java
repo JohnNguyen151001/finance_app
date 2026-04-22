@@ -6,11 +6,16 @@ import androidx.room.PrimaryKey;
 
 @Entity(
         tableName = "budgets",
-        indices = {@Index(value = {"monthKey", "categoryId"}, unique = true)})
+        indices = {
+                @Index(value = {"userId", "monthKey", "categoryId"}, unique = true),
+                @Index("userId")
+        })
 public class BudgetEntity {
 
     @PrimaryKey(autoGenerate = true)
     public long id;
+
+    public String userId;
 
     /** Định dạng yyyy-MM */
     public String monthKey;

@@ -8,18 +8,18 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.financeapp.mobile.R;
 import com.financeapp.mobile.databinding.ActivityRegisterBinding;
-import com.financeapp.mobile.ui.main.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.firestore.FirebaseFirestore;
+import com.google.firebase.auth.UserProfileChangeRequest;
 
-import java.util.HashMap;
-import java.util.Map;
-
+/**
+ * Màn đăng ký tài khoản mới.
+ * Flow: Nhập thông tin → createUserWithEmailAndPassword → updateProfile (displayName) → gửi email xác thực → về Login.
+ * Dữ liệu app (ví, giao dịch) chỉ lưu SQLite local; không dùng Firestore.
+ */
 public class RegisterActivity extends AppCompatActivity {
 
     private ActivityRegisterBinding binding;
     private FirebaseAuth mAuth;
-    private FirebaseFirestore db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,22 +28,22 @@ public class RegisterActivity extends AppCompatActivity {
         setContentView(binding.getRoot());
 
         mAuth = FirebaseAuth.getInstance();
-        db = FirebaseFirestore.getInstance();
 
         binding.btnRegister.setOnClickListener(v -> attemptRegister());
         binding.backToLogin.setOnClickListener(v -> finish());
     }
 
     private void attemptRegister() {
-        String name = binding.nameInput.getText() != null ? binding.nameInput.getText().toString().trim() : "";
-        String ageStr = binding.ageInput.getText() != null ? binding.ageInput.getText().toString().trim() : "";
-        String phone = binding.phoneInput.getText() != null ? binding.phoneInput.getText().toString().trim() : "";
-        String email = binding.emailInput.getText() != null ? binding.emailInput.getText().toString().trim() : "";
-        String pass = binding.passwordInput.getText() != null ? binding.passwordInput.getText().toString().trim() : "";
-        String confirmPass = binding.confirmPasswordInput.getText() != null ? binding.confirmPasswordInput.getText().toString().trim() : "";
+        String name = getText(binding.nameInput);
+        String ageStr = getText(binding.ageInput);
+        String phone = getText(binding.phoneInput);
+        String email = getText(binding.emailInput);
+        String pass = getText(binding.passwordInput);
+        String confirmPass = getText(binding.confirmPasswordInput);
 
-        if (name.isEmpty() || ageStr.isEmpty() || phone.isEmpty() || email.isEmpty() || pass.isEmpty() || confirmPass.isEmpty()) {
-            Toast.makeText(this, "Please fill all fields", Toast.LENGTH_SHORT).show();
+        if (name.isEmpty() || ageStr.isEmpty() || phone.isEmpty()
+                || email.isEmpty() || pass.isEmpty() || confirmPass.isEmpty()) {
+            Toast.makeText(this, R.string.register_fill_all, Toast.LENGTH_SHORT).show();
             return;
         }
 
@@ -52,67 +52,71 @@ public class RegisterActivity extends AppCompatActivity {
             age = Integer.parseInt(ageStr);
             if (age <= 0 || age > 120) throw new NumberFormatException();
         } catch (NumberFormatException e) {
-            Toast.makeText(this, "Please enter a valid age", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.register_invalid_age, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (!pass.equals(confirmPass)) {
-            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.register_password_mismatch, Toast.LENGTH_SHORT).show();
             return;
         }
 
         if (pass.length() < 6) {
-            Toast.makeText(this, "Password must be at least 6 characters", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, R.string.register_password_too_short, Toast.LENGTH_SHORT).show();
             return;
         }
+
+        binding.btnRegister.setEnabled(false);
 
         mAuth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
-                        String userId = mAuth.getCurrentUser().getUid();
-                        
-                        Map<String, Object> userMap = new HashMap<>();
-                        userMap.put("name", name);
-                        userMap.put("age", age);
-                        userMap.put("phone", phone);
-                        userMap.put("email", email);
-
-                        db.collection("users").document(userId)
-                                .set(userMap)
-                                .addOnSuccessListener(aVoid -> {
+                        // Tuổi / SĐT không lưu cloud (SQLite-only); có thể mở rộng bảng user local sau
+                        UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
+                                .setDisplayName(name)
+                                .build();
+                        mAuth.getCurrentUser().updateProfile(profileUpdates)
+                                .addOnCompleteListener(profileTask -> {
+                                    if (!profileTask.isSuccessful()) {
+                                        binding.btnRegister.setEnabled(true);
+                                        Toast.makeText(this,
+                                                profileTask.getException() != null
+                                                        ? profileTask.getException().getMessage()
+                                                        : getString(R.string.register_failed),
+                                                Toast.LENGTH_LONG).show();
+                                        return;
+                                    }
                                     sendVerificationEmail();
-                                })
-                                .addOnFailureListener(e -> {
-                                    Toast.makeText(RegisterActivity.this, "Failed to save user data: " + e.getMessage(), Toast.LENGTH_LONG).show();
                                 });
                     } else {
-                        Toast.makeText(RegisterActivity.this, "Registration Failed: " + (task.getException() != null ? task.getException().getMessage() : "Unknown error"), Toast.LENGTH_LONG).show();
+                        binding.btnRegister.setEnabled(true);
+                        String msg = task.getException() != null
+                                ? task.getException().getMessage()
+                                : getString(R.string.register_failed);
+                        Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
     }
 
     private void sendVerificationEmail() {
-        if (mAuth.getCurrentUser() != null) {
-            mAuth.getCurrentUser().sendEmailVerification()
-                    .addOnCompleteListener(task -> {
-                        if (task.isSuccessful()) {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Registration Successful! Please check your email for a verification link.",
-                                    Toast.LENGTH_LONG).show();
-                            
-                            // Log out to force them to sign in after verification
-                            mAuth.signOut();
-                            
-                            // Send back to Login
-                            startActivity(new Intent(RegisterActivity.this, LoginActivity.class));
-                            finish();
-                        } else {
-                            Toast.makeText(RegisterActivity.this,
-                                    "Failed to send verification email.",
-                                    Toast.LENGTH_SHORT).show();
-                        }
-                    });
-        }
+        if (mAuth.getCurrentUser() == null) return;
+        mAuth.getCurrentUser().sendEmailVerification()
+                .addOnCompleteListener(task -> {
+                    binding.btnRegister.setEnabled(true);
+                    if (task.isSuccessful()) {
+                        Toast.makeText(this, R.string.register_success_verify, Toast.LENGTH_LONG).show();
+                        mAuth.signOut();
+                        startActivity(new Intent(this, LoginActivity.class)
+                                .addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP));
+                        finish();
+                    } else {
+                        Toast.makeText(this, R.string.register_verify_failed, Toast.LENGTH_SHORT).show();
+                    }
+                });
+    }
+
+    private String getText(android.widget.EditText et) {
+        return et != null && et.getText() != null ? et.getText().toString().trim() : "";
     }
 
     @Override

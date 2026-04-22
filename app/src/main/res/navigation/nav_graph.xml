@@ -60,6 +60,12 @@
         tools:layout="@layout/fragment_category" />
 
     <fragment
+        android:id="@+id/nav_add_wallet"
+        android:name="com.financeapp.mobile.ui.wallet.AddWalletFragment"
+        android:label="@string/wallet_add"
+        tools:layout="@layout/fragment_add_wallet" />
+
+    <fragment
         android:id="@+id/nav_budget_edit"
         android:name="com.financeapp.mobile.ui.budget.BudgetEditFragment"
         android:label="@string/budget_edit_title"

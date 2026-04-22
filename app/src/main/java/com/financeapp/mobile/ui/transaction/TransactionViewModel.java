@@ -20,6 +20,8 @@ import com.financeapp.mobile.domain.model.TransactionType;
 import com.financeapp.mobile.ui.format.DateDisplayUtils;
 import com.financeapp.mobile.ui.format.MoneyUtils;
 import com.financeapp.mobile.ui.transaction.model.LedgerListItem;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -64,10 +66,12 @@ public class TransactionViewModel extends AndroidViewModel {
     }
 
     private LedgerUiModel build() {
+        FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
+        String uid = u != null ? u.getUid() : "";
         long[] range = monthRange(period);
         long from = range[0];
         long to = range[1];
-        List<TransactionEntity> list = transactionRepository.getBetween(from, to);
+        List<TransactionEntity> list = transactionRepository.getBetween(uid, from, to);
         list.sort(Comparator.comparingLong((TransactionEntity t) -> t.occurredAt).reversed());
 
         double expense = 0;

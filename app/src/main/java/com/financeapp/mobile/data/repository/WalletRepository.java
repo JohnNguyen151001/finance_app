@@ -9,7 +9,7 @@ import com.financeapp.mobile.data.local.entity.WalletEntity;
 import java.util.List;
 
 /**
- * Nhóm 1 — Quản lý ví (tách UI khỏi Room).
+ * Quản lý ví (Room).
  */
 public class WalletRepository {
 
@@ -19,11 +19,19 @@ public class WalletRepository {
         walletDao = AppDatabase.getInstance(application).walletDao();
     }
 
-    public List<WalletEntity> getWallets() {
-        return walletDao.getAll();
+    public List<WalletEntity> getWallets(String uid) {
+        return walletDao.getAllForUser(uid);
+    }
+
+    public WalletEntity getById(long id) {
+        return walletDao.getById(id);
     }
 
     public long insert(WalletEntity entity) {
         return walletDao.insert(entity);
+    }
+
+    public void update(WalletEntity entity) {
+        walletDao.update(entity);
     }
 }

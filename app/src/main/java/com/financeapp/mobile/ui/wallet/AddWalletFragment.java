@@ -13,6 +13,7 @@ import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.navigation.Navigation;
 
+import com.financeapp.mobile.R;
 import com.financeapp.mobile.databinding.FragmentAddWalletBinding;
 
 public class AddWalletFragment extends Fragment {
@@ -22,7 +23,8 @@ public class AddWalletFragment extends Fragment {
 
     @Nullable
     @Override
-    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container,
+                             @Nullable Bundle savedInstanceState) {
         binding = FragmentAddWalletBinding.inflate(inflater, container, false);
         return binding.getRoot();
     }
@@ -32,25 +34,29 @@ public class AddWalletFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AddWalletViewModel.class);
 
-        binding.toolbarAddWallet.setNavigationOnClickListener(v -> Navigation.findNavController(v).navigateUp());
+        binding.toolbarAddWallet.setNavigationOnClickListener(v ->
+                Navigation.findNavController(v).navigateUp());
 
-        // Setup Spinner
+        // Spinner loại ví
         String[] walletTypes = {"CASH", "BANK", "CREDIT", "GOAL"};
-        ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_dropdown_item, walletTypes);
+        ArrayAdapter<String> adapter = new ArrayAdapter<>(
+                requireContext(), android.R.layout.simple_spinner_dropdown_item, walletTypes);
         binding.spinnerWalletType.setAdapter(adapter);
 
         binding.btnSaveWallet.setOnClickListener(v -> {
-            String name = binding.inputWalletName.getText().toString().trim();
-            String type = binding.spinnerWalletType.getSelectedItem().toString();
-            String balanceStr = binding.inputWalletBalance.getText().toString().trim();
+            String name = binding.inputWalletName.getText() != null
+                    ? binding.inputWalletName.getText().toString().trim() : "";
+            String type = binding.spinnerWalletType.getSelectedItem() != null
+                    ? binding.spinnerWalletType.getSelectedItem().toString() : "CASH";
+            String balanceStr = binding.inputWalletBalance.getText() != null
+                    ? binding.inputWalletBalance.getText().toString().trim() : "";
             double balance = balanceStr.isEmpty() ? 0 : Double.parseDouble(balanceStr);
-
             viewModel.saveWallet(name, type, balance);
         });
 
         viewModel.getSaveSuccess().observe(getViewLifecycleOwner(), success -> {
-            if (success) {
-                Toast.makeText(requireContext(), "Wallet created successfully", Toast.LENGTH_SHORT).show();
+            if (Boolean.TRUE.equals(success)) {
+                Toast.makeText(requireContext(), R.string.wallet_created, Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(requireView()).navigateUp();
             }
         });
