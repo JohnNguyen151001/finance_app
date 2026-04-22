@@ -10,6 +10,13 @@
         android:checkable="true"
         android:icon="@drawable/ic_nav_ledger"
         android:title="@string/nav_ledger_short" />
+
+    <!-- Placeholder item to create space for FAB -->
+    <item
+        android:id="@+id/placeholder"
+        android:title=""
+        android:enabled="false" />
+
     <item
         android:id="@+id/nav_budget"
         android:checkable="true"

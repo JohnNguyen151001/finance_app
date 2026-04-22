@@ -2,6 +2,7 @@ package com.financeapp.mobile.data.local.entity;
 
 import androidx.room.ColumnInfo;
 import androidx.room.Entity;
+import androidx.room.ForeignKey;
 import androidx.room.Index;
 import androidx.room.PrimaryKey;
 
@@ -9,28 +10,39 @@ import androidx.room.PrimaryKey;
         tableName = "wallets",
         indices = {
                 @Index("name"),
-                @Index("userId")
+                @Index("user_id")
+        },
+        foreignKeys = {
+                @ForeignKey(
+                        entity = UserEntity.class,
+                        parentColumns = "uuid",
+                        childColumns = "user_id",
+                        onDelete = ForeignKey.CASCADE
+                )
         })
 public class WalletEntity {
 
     @PrimaryKey(autoGenerate = true)
+    @ColumnInfo(name = "wallet_id")
     public long id;
 
-    /** Firebase UID; null for legacy rows before migration. */
+    @ColumnInfo(name = "user_id")
     public String userId;
 
     public String name;
-    /** Ví dụ: CASH, BANK, CREDIT, GOAL */
-    public String type;
     public double balance;
-    public String iconKey;
+
+    public String type; // Thêm trường type theo ERD (Vd: Tiền mặt, Thẻ ACB)
 
     @ColumnInfo(defaultValue = "'VND'")
     public String currency = "VND";
 
-    public long createdAt;
+    @ColumnInfo(name = "icon_url")
+    public String iconUrl;
+
+    public long createdAt; // Thêm trường createdAt theo ERD
 
     /** 0 = active, 1 = soft-deleted */
-    @ColumnInfo(defaultValue = "0")
+    @ColumnInfo(name = "is_deleted", defaultValue = "0")
     public int isDeleted = 0;
 }

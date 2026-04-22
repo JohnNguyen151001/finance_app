@@ -20,6 +20,7 @@ public class AddWalletFragment extends Fragment {
 
     private FragmentAddWalletBinding binding;
     private AddWalletViewModel viewModel;
+    private long walletId = -1;
 
     @Nullable
     @Override
@@ -34,14 +35,36 @@ public class AddWalletFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AddWalletViewModel.class);
 
+        if (getArguments() != null) {
+            walletId = getArguments().getLong("walletId", -1);
+        }
+
         binding.toolbarAddWallet.setNavigationOnClickListener(v ->
                 Navigation.findNavController(v).navigateUp());
+
+        if (walletId > 0) {
+            binding.toolbarAddWallet.setTitle("Chỉnh sửa ví");
+            viewModel.loadWallet(walletId);
+        }
 
         // Spinner loại ví
         String[] walletTypes = {"CASH", "BANK", "CREDIT", "GOAL"};
         ArrayAdapter<String> adapter = new ArrayAdapter<>(
                 requireContext(), android.R.layout.simple_spinner_dropdown_item, walletTypes);
         binding.spinnerWalletType.setAdapter(adapter);
+
+        viewModel.getExistingWallet().observe(getViewLifecycleOwner(), w -> {
+            if (w != null) {
+                binding.inputWalletName.setText(w.name);
+                binding.inputWalletBalance.setText(String.valueOf(w.balance));
+                for (int i = 0; i < walletTypes.length; i++) {
+                    if (walletTypes[i].equals(w.type)) {
+                        binding.spinnerWalletType.setSelection(i);
+                        break;
+                    }
+                }
+            }
+        });
 
         binding.btnSaveWallet.setOnClickListener(v -> {
             String name = binding.inputWalletName.getText() != null
@@ -50,13 +73,18 @@ public class AddWalletFragment extends Fragment {
                     ? binding.spinnerWalletType.getSelectedItem().toString() : "CASH";
             String balanceStr = binding.inputWalletBalance.getText() != null
                     ? binding.inputWalletBalance.getText().toString().trim() : "";
-            double balance = balanceStr.isEmpty() ? 0 : Double.parseDouble(balanceStr);
-            viewModel.saveWallet(name, type, balance);
+            double balance = 0;
+            try {
+                balance = balanceStr.isEmpty() ? 0 : Double.parseDouble(balanceStr);
+            } catch (NumberFormatException ignored) {}
+            
+            viewModel.saveWallet(walletId, name, type, balance);
         });
 
         viewModel.getSaveSuccess().observe(getViewLifecycleOwner(), success -> {
             if (Boolean.TRUE.equals(success)) {
-                Toast.makeText(requireContext(), R.string.wallet_created, Toast.LENGTH_SHORT).show();
+                String msg = (walletId > 0) ? "Đã cập nhật ví" : "Đã tạo ví mới";
+                Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show();
                 Navigation.findNavController(requireView()).navigateUp();
             }
         });

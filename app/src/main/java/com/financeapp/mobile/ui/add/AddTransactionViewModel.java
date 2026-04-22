@@ -1,7 +1,6 @@
 package com.financeapp.mobile.ui.add;
 
 import android.app.Application;
-
 import androidx.annotation.NonNull;
 import androidx.lifecycle.AndroidViewModel;
 import androidx.lifecycle.LiveData;
@@ -44,87 +43,73 @@ public class AddTransactionViewModel extends AndroidViewModel {
         reloadMeta();
     }
 
-    public LiveData<FormMeta> getMeta() {
-        return meta;
-    }
-
-    public LiveData<Boolean> getSaveDone() {
-        return saveDone;
-    }
+    public LiveData<FormMeta> getMeta() { return meta; }
+    public LiveData<Boolean> getSaveDone() { return saveDone; }
 
     public void setTab(int tab) {
         this.tab = tab;
         reloadMeta();
     }
 
-    public void clearSaveDone() {
-        saveDone.setValue(null);
-    }
+    public void clearSaveDone() { saveDone.setValue(null); }
 
     private static String uidOrEmpty() {
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
         return u != null ? u.getUid() : "";
     }
 
-    private void reloadMeta() {
+    public void reloadMeta() {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
             String uid = uidOrEmpty();
             List<WalletEntity> wallets = walletRepository.getWallets(uid);
-            String kind = tab == TAB_INCOME ? "INCOME" : "EXPENSE";
+            String kind = (tab == TAB_INCOME) ? "INCOME" : "EXPENSE";
             List<CategoryEntity> categories = categoryRepository.getByKind(uid, kind);
+            
             meta.postValue(new FormMeta(wallets, categories));
         });
     }
 
     public void save(long walletId, long categoryId, double amount, String note, long occurredAt) {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
-            String uid = uidOrEmpty();
             TransactionType type = typeForTab();
+            
             TransactionEntity t = new TransactionEntity();
-            t.userId = uid.isEmpty() ? null : uid;
             t.walletId = walletId;
             t.categoryId = categoryId;
             t.amount = amount;
             t.type = type.name();
-            t.note = note != null ? note : "";
-            t.occurredAt = occurredAt;
+            t.note = (note != null) ? note : "";
+            t.transDate = occurredAt;
             t.isDeleted = 0;
+            
             transactionRepository.insert(t);
 
             WalletEntity w = walletRepository.getById(walletId);
             if (w != null) {
-                applyBalance(w, amount, type);
+                if (type == TransactionType.INCOME) {
+                    w.balance += amount;
+                } else {
+                    w.balance -= amount;
+                }
                 walletRepository.update(w);
             }
+            
             saveDone.postValue(true);
         });
     }
 
     private TransactionType typeForTab() {
-        if (tab == TAB_INCOME) {
-            return TransactionType.INCOME;
-        }
-        if (tab == TAB_DEBT) {
-            return TransactionType.BORROW;
-        }
+        if (tab == TAB_INCOME) return TransactionType.INCOME;
+        if (tab == TAB_DEBT) return TransactionType.BORROW;
         return TransactionType.EXPENSE;
-    }
-
-    private void applyBalance(WalletEntity w, double amount, TransactionType type) {
-        if (type == TransactionType.INCOME) {
-            w.balance += amount;
-        } else {
-            w.balance -= amount;
-        }
     }
 
     public static class FormMeta {
         public final List<WalletEntity> wallets;
         public final List<CategoryEntity> categories;
-
         public FormMeta(List<WalletEntity> wallets, List<CategoryEntity> categories) {
-            this.wallets = wallets != null ? wallets : new ArrayList<>();
-            this.categories = categories != null ? categories : new ArrayList<>();
+            this.wallets = (wallets != null) ? wallets : new ArrayList<>();
+            this.categories = (categories != null) ? categories : new ArrayList<>();
         }
     }
 }

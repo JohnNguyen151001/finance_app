@@ -159,10 +159,10 @@ public final class ChallengeEngine {
             if (!isOutgoing(t)) {
                 continue;
             }
-            if (t.occurredAt < rangeFrom || t.occurredAt >= rangeToExclusive) {
+            if (t.transDate < rangeFrom || t.transDate >= rangeToExclusive) {
                 continue;
             }
-            spendDays.add(toLocalDate(t.occurredAt, zone));
+            spendDays.add(toLocalDate(t.transDate, zone));
         }
         LocalDate start = toLocalDate(rangeFrom, zone);
         LocalDate end = (monthOffset == 0)
@@ -260,7 +260,7 @@ public final class ChallengeEngine {
         }
         int over = 0;
         for (BudgetEntity b : budgets) {
-            double spent = txRepo.sumBudgetOutgoingForCategoryBetween(
+            double spent = txRepo.sumExpenseForCategoryBetween(
                     userId, b.categoryId, rangeFrom, rangeToExclusive);
             if (b.limitAmount > 0 && spent > b.limitAmount) {
                 over++;

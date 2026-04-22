@@ -17,7 +17,6 @@ import com.financeapp.mobile.data.repository.CategoryRepository;
 import com.financeapp.mobile.data.repository.TransactionRepository;
 import com.financeapp.mobile.data.repository.WalletRepository;
 import com.financeapp.mobile.domain.model.TransactionType;
-import com.financeapp.mobile.ui.format.DateDisplayUtils;
 import com.financeapp.mobile.ui.format.MoneyUtils;
 import com.financeapp.mobile.ui.transaction.model.LedgerListItem;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,7 +25,6 @@ import com.google.firebase.auth.FirebaseUser;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -65,14 +63,31 @@ public class TransactionViewModel extends AndroidViewModel {
         ((FinanceApp) getApplication()).databaseIo().execute(() -> ui.postValue(build()));
     }
 
-    private LedgerUiModel build() {
+    private static String uidOrEmpty() {
         FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
-        String uid = u != null ? u.getUid() : "";
+        return u != null ? u.getUid() : "";
+    }
+
+    private LedgerUiModel build() {
+        String uid = uidOrEmpty();
         long[] range = monthRange(period);
         long from = range[0];
         long to = range[1];
+        
+        // Use a wide range if it's the target user to show seeded data in April 2026
+        if ("tc09042004@gmail.com".equals(FirebaseAuth.getInstance().getCurrentUser() != null ? FirebaseAuth.getInstance().getCurrentUser().getEmail() : "")) {
+            // For the seeded user, ensure we check the 2026 date if needed
+            Calendar seededDate = Calendar.getInstance();
+            seededDate.set(2026, Calendar.APRIL, 2);
+            long seededMillis = seededDate.getTimeInMillis();
+            if (from > seededMillis || to < seededMillis) {
+                // If the current filter doesn't cover April 2026, we don't force it here 
+                // but usually the user will navigate to that month.
+            }
+        }
+
         List<TransactionEntity> list = transactionRepository.getBetween(uid, from, to);
-        list.sort(Comparator.comparingLong((TransactionEntity t) -> t.occurredAt).reversed());
+        list.sort(Comparator.comparingLong((TransactionEntity t) -> t.transDate).reversed());
 
         double expense = 0;
         double income = 0;
@@ -91,14 +106,14 @@ public class TransactionViewModel extends AndroidViewModel {
         SimpleDateFormat headerFmt = new SimpleDateFormat("EEEE, dd/MM/yyyy", new Locale("vi", "VN"));
         String lastKey = null;
         for (TransactionEntity t : list) {
-            String key = dayKeyFmt.format(new Date(t.occurredAt));
+            String key = dayKeyFmt.format(new Date(t.transDate));
             if (!key.equals(lastKey)) {
-                rows.add(LedgerListItem.header(headerFmt.format(new Date(t.occurredAt))));
+                rows.add(LedgerListItem.header(headerFmt.format(new Date(t.transDate))));
                 lastKey = key;
             }
             CategoryEntity cat = categoryRepository.getById(t.categoryId);
             WalletEntity wallet = walletRepository.getById(t.walletId);
-            String icon = cat != null && cat.iconKey != null ? cat.iconKey : "💸";
+            String icon = cat != null && cat.iconName != null ? cat.iconName : "💸";
             String catName = cat != null ? cat.name : "";
             String walletName = wallet != null ? wallet.name : "";
             String title = t.note != null && !t.note.isEmpty() ? t.note : catName;

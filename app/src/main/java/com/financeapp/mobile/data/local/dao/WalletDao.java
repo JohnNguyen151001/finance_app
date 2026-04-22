@@ -12,10 +12,10 @@ import java.util.List;
 @Dao
 public interface WalletDao {
 
-    @Query("SELECT * FROM wallets WHERE userId = :uid AND isDeleted = 0 ORDER BY createdAt DESC")
+    @Query("SELECT * FROM wallets WHERE user_id = :uid AND is_deleted = 0")
     List<WalletEntity> getAllForUser(String uid);
 
-    @Query("SELECT * FROM wallets WHERE id = :id LIMIT 1")
+    @Query("SELECT * FROM wallets WHERE wallet_id = :id LIMIT 1")
     WalletEntity getById(long id);
 
     @Insert
@@ -24,6 +24,6 @@ public interface WalletDao {
     @Update
     void update(WalletEntity wallet);
 
-    @Query("UPDATE wallets SET isDeleted = 1 WHERE id = :id")
+    @Query("UPDATE wallets SET is_deleted = 1 WHERE wallet_id = :id")
     void softDeleteById(long id);
 }

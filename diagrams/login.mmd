@@ -1,0 +1,26 @@
+flowchart TD
+    %% Định nghĩa màu sắc
+    classDef start fill:#f5f5f5,stroke:#d1d1d1,stroke-width:2px;
+    classDef action fill:#fff0e8,stroke:#f97316,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#f59e0b,stroke-width:1px;
+    classDef success fill:#e8f8f1,stroke:#1cb072,stroke-width:1px;
+    classDef error fill:#fef0f0,stroke:#e84040,stroke-width:1px;
+
+    A([Mở ứng dụng SpendSmart]):::start --> B{Đã lưu Token<br>đăng nhập?}:::logic
+    
+    B -- Có --> C[Bỏ qua đăng nhập<br>Vào màn hình Tổng quan]:::success
+    B -- Không --> D[Hiển thị màn hình Đăng nhập<br>Email / Google / Apple]:::action
+    
+    D --> E[Nhập thông tin &<br>Bấm Đăng nhập/Đăng ký]:::action
+    E --> F{Xác thực qua<br>Firebase Auth}:::logic
+    
+    F -- Thất bại --> G[Báo lỗi sai mật khẩu<br>hoặc email]:::error
+    G --> D
+    
+    F -- Thành công --> H{Tài khoản<br>mới tinh?}:::logic
+    
+    H -- Phải (New User) --> I[Tạo dữ liệu mặc định:<br>- Ví 'Tiền mặt'<br>- Danh mục cơ bản]:::success
+    I --> J
+    H -- Không (Old User) --> J[Tải dữ liệu User<br>từ SQLite/Cloud]:::success
+    
+    J --> K([Chuyển hướng vào<br>Màn hình Tổng quan]):::start

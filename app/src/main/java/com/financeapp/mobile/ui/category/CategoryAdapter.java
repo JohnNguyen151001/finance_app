@@ -52,13 +52,13 @@ public class CategoryAdapter extends RecyclerView.Adapter<CategoryAdapter.VH> {
         }
 
         void bind(CategoryEntity c) {
-            b.catIcon.setText(c.iconKey != null ? c.iconKey : "📁");
+            b.catIcon.setText(c.iconName != null ? c.iconName : "📁");
             GradientDrawable circle = new GradientDrawable();
             circle.setShape(GradientDrawable.OVAL);
             circle.setColor(ICON_BG[(int) (Math.abs(c.id) % ICON_BG.length)]);
             b.catIconBg.setBackground(circle);
             b.catName.setText(c.name);
-            b.catWallet.setText("Tiền mặt");
+            b.catWallet.setText("Tất cả ví");
         }
     }
 }

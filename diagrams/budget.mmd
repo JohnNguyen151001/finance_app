@@ -1,0 +1,27 @@
+flowchart TD
+    classDef start fill:#f5f5f5,stroke:#d1d1d1,stroke-width:2px;
+    classDef action fill:#fff0e8,stroke:#f97316,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#f59e0b,stroke-width:1px;
+    classDef success fill:#e8f8f1,stroke:#1cb072,stroke-width:1px;
+    classDef error fill:#fef0f0,stroke:#e84040,stroke-width:1px;
+
+    A([Vào tab Ngân sách <br> Bấm '+ Thêm mới']):::start --> B[Chọn Nhóm danh mục<br>VD: Ăn uống, Mua sắm]:::action
+    B --> C[Nhập số tiền hạn mức<br>Bằng bàn phím tùy chỉnh]:::action
+    C --> D[Chọn kỳ hạn<br>VD: Tháng này]:::action
+    D --> E[Bật/Tắt 'Lặp lại'<br>Lưu cờ 'repeat']:::action
+    
+    E --> F{Hợp lệ?<br>Đã chọn đủ thông tin}:::logic
+    F -- Không --> G[Nút Lưu bị mờ<br>Không cho bấm]:::error
+    
+    F -- Có --> H[Lưu vào DB (Room)<br>Bảng BUDGET]:::success
+    
+    H --> I[Logic: Query bảng TRANSACTION<br>Lấy tổng chi của category_id này<br>trong tháng hiện tại]:::logic
+    
+    I --> J[Logic: Tính tỷ lệ %<br>% = Đã chi / Hạn mức]:::logic
+    
+    J --> K{Mức cảnh báo?}:::logic
+    K -- Dưới 80% --> L[Vẽ Progress Bar<br>Màu Xanh (Green)]:::success
+    K -- 80% - 99% --> M[Vẽ Progress Bar<br>Màu Vàng (Yellow)]:::logic
+    K -- Vượt 100% --> N[Vẽ Progress Bar<br>Màu Đỏ (Red)]:::error
+    
+    L & M & N --> O([Cập nhật UI Ngân sách<br>Hoàn thành]):::start

@@ -19,7 +19,14 @@ public class WalletFragment extends Fragment {
 
     private FragmentWalletBinding binding;
     private WalletViewModel viewModel;
-    private final WalletAdapter adapter = new WalletAdapter();
+    
+    private final WalletAdapter adapter = new WalletAdapter(wallet -> {
+        Bundle args = new Bundle();
+        args.putLong("walletId", wallet.id);
+        if (getView() != null) {
+            Navigation.findNavController(getView()).navigate(R.id.nav_add_wallet, args);
+        }
+    });
 
     @Nullable
     @Override

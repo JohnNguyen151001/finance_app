@@ -6,9 +6,13 @@ import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.financeapp.mobile.FinanceApp;
 import com.financeapp.mobile.R;
+import com.financeapp.mobile.data.local.AppDatabase;
+import com.financeapp.mobile.data.local.entity.UserEntity;
 import com.financeapp.mobile.databinding.ActivityRegisterBinding;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.UserProfileChangeRequest;
 
 /**
@@ -71,11 +75,13 @@ public class RegisterActivity extends AppCompatActivity {
         mAuth.createUserWithEmailAndPassword(email, pass)
                 .addOnCompleteListener(this, task -> {
                     if (task.isSuccessful() && mAuth.getCurrentUser() != null) {
-                        // Tuổi / SĐT không lưu cloud (SQLite-only); có thể mở rộng bảng user local sau
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        syncUserToLocal(firebaseUser, name);
+                        
                         UserProfileChangeRequest profileUpdates = new UserProfileChangeRequest.Builder()
                                 .setDisplayName(name)
                                 .build();
-                        mAuth.getCurrentUser().updateProfile(profileUpdates)
+                        firebaseUser.updateProfile(profileUpdates)
                                 .addOnCompleteListener(profileTask -> {
                                     if (!profileTask.isSuccessful()) {
                                         binding.btnRegister.setEnabled(true);
@@ -96,6 +102,19 @@ public class RegisterActivity extends AppCompatActivity {
                         Toast.makeText(this, msg, Toast.LENGTH_LONG).show();
                     }
                 });
+    }
+
+    private void syncUserToLocal(FirebaseUser firebaseUser, String displayName) {
+        if (firebaseUser == null) return;
+        ((FinanceApp) getApplication()).databaseIo().execute(() -> {
+            AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+            UserEntity user = new UserEntity();
+            user.uuid = firebaseUser.getUid();
+            user.email = firebaseUser.getEmail();
+            user.display_name = displayName;
+            user.created_at = System.currentTimeMillis();
+            db.userDao().insert(user);
+        });
     }
 
     private void sendVerificationEmail() {

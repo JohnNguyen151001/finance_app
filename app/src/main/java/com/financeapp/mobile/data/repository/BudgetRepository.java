@@ -16,16 +16,16 @@ public class BudgetRepository {
         budgetDao = AppDatabase.getInstance(application).budgetDao();
     }
 
-    public List<BudgetEntity> getForMonth(String uid, String monthKey) {
-        return budgetDao.getForMonthForUser(uid, monthKey);
+    public List<BudgetEntity> getAllForUser(String uid) {
+        return budgetDao.getAllForUser(uid);
     }
 
     public BudgetEntity getById(long id) {
         return budgetDao.getById(id);
     }
 
-    public BudgetEntity getByMonthAndCategory(String uid, String monthKey, long categoryId) {
-        return budgetDao.getByMonthAndCategoryForUser(uid, monthKey, categoryId);
+    public BudgetEntity getByCategory(String uid, long categoryId) {
+        return budgetDao.getByCategoryForUser(uid, categoryId);
     }
 
     public long insert(BudgetEntity entity) {
@@ -38,9 +38,5 @@ public class BudgetRepository {
 
     public void deleteById(long id) {
         budgetDao.deleteById(id);
-    }
-
-    public void deleteForMonth(String uid, String monthKey) {
-        budgetDao.deleteForMonthForUser(uid, monthKey);
     }
 }

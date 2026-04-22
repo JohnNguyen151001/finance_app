@@ -205,7 +205,7 @@ public class BudgetEditFragment extends Fragment {
                 long toEx = BudgetMonthUtils.monthEndExclusiveMillisForOffset(off);
                 FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
                 String uid = u != null ? u.getUid() : "";
-                spent = txRepo.sumBudgetOutgoingForCategoryBetween(uid, categoryId, from, toEx);
+                spent = txRepo.sumExpenseForCategoryBetween(uid, categoryId, from, toEx);
             }
             final double finalSpent = spent;
             final BudgetEntity finalExisting = existing;
@@ -215,7 +215,7 @@ public class BudgetEditFragment extends Fragment {
                 if (binding == null) return;
 
                 if (finalCat != null) {
-                    binding.editIcon.setText(finalCat.iconKey != null ? finalCat.iconKey : "📁");
+                    binding.editIcon.setText(finalCat.iconName != null ? finalCat.iconName : "📁");
                     binding.editCategoryName.setText(finalCat.name);
                 } else {
                     binding.editCategoryName.setText("—");
@@ -238,17 +238,16 @@ public class BudgetEditFragment extends Fragment {
         ((FinanceApp) requireActivity().getApplication()).databaseIo().execute(() -> {
             BudgetRepository budgetRepo = new BudgetRepository(requireActivity().getApplication());
             CategoryRepository catRepo = new CategoryRepository(requireActivity().getApplication());
-            String monthKey = budgetViewModel.getCurrentMonthKey();
             FirebaseUser u = FirebaseAuth.getInstance().getCurrentUser();
             String uid = u != null ? u.getUid() : "";
 
             List<BudgetEditLine> lines = new ArrayList<>();
             for (long id : ids) {
                 CategoryEntity cat = catRepo.getById(id);
-                BudgetEntity b = budgetRepo.getByMonthAndCategory(uid, monthKey, id);
+                BudgetEntity b = budgetRepo.getByCategory(uid, id);
                 double pref = b != null ? b.limitAmount : 0;
                 String name = cat != null ? cat.name : "?";
-                String icon = cat != null && cat.iconKey != null ? cat.iconKey : "📁";
+                String icon = cat != null && cat.iconName != null ? cat.iconName : "📁";
                 lines.add(new BudgetEditLine(id, name, icon, pref));
             }
 

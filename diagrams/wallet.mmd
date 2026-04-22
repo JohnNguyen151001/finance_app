@@ -1,0 +1,25 @@
+flowchart TD
+    classDef start fill:#f5f5f5,stroke:#d1d1d1,stroke-width:2px;
+    classDef action fill:#fff0e8,stroke:#f97316,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#f59e0b,stroke-width:1px;
+    classDef success fill:#e8f8f1,stroke:#1cb072,stroke-width:1px;
+    classDef error fill:#fef0f0,stroke:#e84040,stroke-width:1px;
+
+    A([Vào Tài khoản -> Ví của tôi<br>Bấm 'Thêm Ví']):::start --> B[Nhập Tên ví<br>VD: Thẻ tín dụng ACB]:::action
+    B --> C[Chọn Icon và Loại tiền tệ]:::action
+    C --> D[Nhập 'Số dư ban đầu']:::action
+    
+    D --> E{Tên ví trống?}:::logic
+    E -- Có --> F[Báo lỗi: Yêu cầu nhập tên]:::error
+    F --> B
+    
+    E -- Không --> G[Lưu DB (Room)<br>Bảng WALLET]:::success
+    
+    G --> H{Số dư ban đầu > 0?}:::logic
+    
+    H -- Có --> I[Auto Insert vào bảng TRANSACTION<br>Giao dịch 'Điều chỉnh số dư'<br>Cộng vào ví mới]:::success
+    H -- Không (Bằng 0) --> J[Bỏ qua]:::logic
+    
+    I & J --> K[HomeViewModel tính lại<br>TỔNG SỐ DƯ toàn app]:::success
+    
+    K --> L([Hoàn thành<br>Quay lại danh sách Ví]):::start

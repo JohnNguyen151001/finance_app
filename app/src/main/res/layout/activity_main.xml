@@ -13,31 +13,43 @@
         app:defaultNavHost="true"
         app:navGraph="@navigation/nav_graph" />
 
-    <com.google.android.material.bottomnavigation.BottomNavigationView
-        android:id="@+id/bottom_nav"
+    <com.google.android.material.bottomappbar.BottomAppBar
+        android:id="@+id/bottom_app_bar"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="wrap_content"
         android:layout_gravity="bottom"
-        android:background="@color/surface_page"
-        app:elevation="12dp"
-        app:itemIconSize="24dp"
-        app:itemIconTint="@color/bottom_nav_icon_tint"
-        app:itemPaddingTop="6dp"
-        app:itemRippleColor="@color/bottom_nav_ripple"
-        app:itemTextColor="@color/bottom_nav_text_tint"
-        app:labelVisibilityMode="labeled"
-        app:menu="@menu/menu_bottom_app_bar" />
+        android:backgroundTint="@color/surface_page"
+        app:fabAlignmentMode="center"
+        app:fabCradleMargin="10dp"
+        app:fabCradleRoundedCornerRadius="16dp"
+        app:fabCradleVerticalOffset="8dp">
 
-    <!-- FAB floats 8dp above the bottom nav, independent of the 4 nav items -->
+        <com.google.android.material.bottomnavigation.BottomNavigationView
+            android:id="@+id/bottom_nav"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:background="@android:color/transparent"
+            app:elevation="0dp"
+            app:itemIconSize="22dp"
+            app:itemIconTint="@color/bottom_nav_icon_tint"
+            app:itemPaddingTop="8dp"
+            app:itemPaddingBottom="8dp"
+            app:itemRippleColor="@color/bottom_nav_ripple"
+            app:itemTextColor="@color/bottom_nav_text_tint"
+            app:labelVisibilityMode="labeled"
+            app:menu="@menu/menu_bottom_app_bar" />
+
+    </com.google.android.material.bottomappbar.BottomAppBar>
+
     <com.google.android.material.floatingactionbutton.FloatingActionButton
         android:id="@+id/fab_add"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_gravity="bottom|center_horizontal"
-        android:layout_marginBottom="80dp"
         android:contentDescription="@string/nav_add"
         app:backgroundTint="@color/spend_green"
-        app:fabSize="normal"
+        app:layout_anchor="@id/bottom_app_bar"
+        app:maxImageSize="28dp"
         app:srcCompat="@drawable/ic_add_fab"
         app:tint="@color/white" />
 
