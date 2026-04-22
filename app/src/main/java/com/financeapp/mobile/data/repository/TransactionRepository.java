@@ -5,7 +5,6 @@ import android.app.Application;
 import com.financeapp.mobile.data.local.AppDatabase;
 import com.financeapp.mobile.data.local.dao.TransactionDao;
 import com.financeapp.mobile.data.local.entity.TransactionEntity;
-import com.financeapp.mobile.domain.model.TransactionType;
 
 import java.util.List;
 
@@ -36,18 +35,15 @@ public class TransactionRepository {
         return transactionDao.sumExpenseForCategoryBetweenForUser(
                 uid,
                 categoryId,
-                TransactionType.EXPENSE.name(),
                 fromMillis,
                 toMillisExclusive);
     }
 
-    public double sumBudgetOutgoingForCategoryBetween(String uid, long categoryId, long fromMillis, long toMillisExclusive) {
-        return transactionDao.sumBudgetOutgoingForCategoryBetweenForUser(
-                uid,
-                categoryId,
-                TransactionType.EXPENSE.name(),
-                TransactionType.BORROW.name(),
-                fromMillis,
-                toMillisExclusive);
+    public void update(TransactionEntity entity) {
+        transactionDao.update(entity);
+    }
+
+    public void deleteById(long id) {
+        transactionDao.deleteById(id);
     }
 }

@@ -17,7 +17,16 @@ import java.util.List;
 
 public class WalletAdapter extends RecyclerView.Adapter<WalletAdapter.VH> {
 
+    public interface OnWalletClickListener {
+        void onWalletClick(WalletEntity wallet);
+    }
+
     private final List<WalletEntity> data = new ArrayList<>();
+    private final OnWalletClickListener listener;
+
+    public WalletAdapter(OnWalletClickListener listener) {
+        this.listener = listener;
+    }
 
     public void submit(List<WalletEntity> wallets) {
         data.clear();
@@ -35,7 +44,11 @@ public class WalletAdapter extends RecyclerView.Adapter<WalletAdapter.VH> {
 
     @Override
     public void onBindViewHolder(@NonNull VH holder, int position) {
-        holder.bind(data.get(position));
+        WalletEntity wallet = data.get(position);
+        holder.bind(wallet);
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) listener.onWalletClick(wallet);
+        });
     }
 
     @Override
@@ -52,7 +65,7 @@ public class WalletAdapter extends RecyclerView.Adapter<WalletAdapter.VH> {
         }
 
         void bind(WalletEntity w) {
-            String icon = w.iconKey != null ? w.iconKey : "💼";
+            String icon = w.iconUrl != null ? w.iconUrl : "💼";
             binding.walletIcon.setText(icon);
             binding.walletName.setText(w.name);
             binding.walletType.setText(w.type);

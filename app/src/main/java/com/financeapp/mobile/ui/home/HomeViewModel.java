@@ -133,7 +133,7 @@ public class HomeViewModel extends AndroidViewModel {
         long topAggFrom = weeklyTopSpending ? Math.max(from, now - 7L * 86_400_000L) : from;
         Map<Long, Double> expenseByCat = new HashMap<>();
         for (TransactionEntity t : monthTx) {
-            if (t.occurredAt < topAggFrom) {
+            if (t.transDate < topAggFrom) {
                 continue;
             }
             TransactionType type = safeType(t.type);
@@ -158,7 +158,7 @@ public class HomeViewModel extends AndroidViewModel {
             }
             CategoryEntity cat = categoryRepository.getById(e.getKey());
             String name = cat != null ? cat.name : "?";
-            String icon = cat != null && cat.iconKey != null ? cat.iconKey : "📁";
+            String icon = cat != null && cat.iconName != null ? cat.iconName : "📁";
             int pct = (int) Math.round(e.getValue() * 100.0 / totalPctBase);
             int prog = Math.min(100, pct);
             top.add(new HomeUiModel.TopSpendingRow(icon, name, pct, prog));
@@ -169,9 +169,9 @@ public class HomeViewModel extends AndroidViewModel {
         List<HomeUiModel.RecentRow> recent = new ArrayList<>();
         for (TransactionEntity t : recentEntities) {
             CategoryEntity cat = categoryRepository.getById(t.categoryId);
-            String icon = cat != null && cat.iconKey != null ? cat.iconKey : "💸";
+            String icon = cat != null && cat.iconName != null ? cat.iconName : "💸";
             String catName = cat != null ? cat.name : "";
-            String day = DateDisplayUtils.formatTransactionSubtitle(t.occurredAt);
+            String day = DateDisplayUtils.formatTransactionSubtitle(t.transDate);
             String subtitle = catName + " · " + day;
             TransactionType type = safeType(t.type);
             String amountText;
@@ -226,8 +226,7 @@ public class HomeViewModel extends AndroidViewModel {
         List<TransactionEntity> lastMonthTx = transactionRepository.getBetween(uid, lastFrom, lastTo);
         long now = System.currentTimeMillis();
         List<TransactionEntity> weekTx = transactionRepository.getBetween(uid, now - 7L * 86_400_000L, now + 1);
-        String monthKey = BudgetMonthUtils.monthKeyForOffset(0);
-        List<BudgetEntity> budgets = budgetRepository.getForMonth(uid, monthKey);
+        List<BudgetEntity> budgets = budgetRepository.getAllForUser(uid);
 
         for (ChallengeEngine.Progress p : ChallengeEngine.evaluate(
                 getApplication(),
@@ -281,8 +280,7 @@ public class HomeViewModel extends AndroidViewModel {
 
     private HomeUiModel.HomeBudgetOverview buildBudgetOverview(long rangeFrom, long rangeToExclusive) {
         String uid = uidOrEmpty();
-        String monthKey = BudgetMonthUtils.monthKeyForOffset(0);
-        List<BudgetEntity> budgets = budgetRepository.getForMonth(uid, monthKey);
+        List<BudgetEntity> budgets = budgetRepository.getAllForUser(uid);
         if (budgets.isEmpty()) {
             return new HomeUiModel.HomeBudgetOverview(
                     true,
@@ -298,7 +296,7 @@ public class HomeViewModel extends AndroidViewModel {
         int atRisk = 0;
         for (BudgetEntity b : budgets) {
             totalLimit += b.limitAmount;
-            double spent = transactionRepository.sumBudgetOutgoingForCategoryBetween(
+            double spent = transactionRepository.sumExpenseForCategoryBetween(
                     uid, b.categoryId, rangeFrom, rangeToExclusive);
             totalSpent += spent;
             if (b.limitAmount > 0) {
@@ -334,7 +332,7 @@ public class HomeViewModel extends AndroidViewModel {
             if (type != TransactionType.EXPENSE && type != TransactionType.BORROW) {
                 continue;
             }
-            cal.setTimeInMillis(t.occurredAt);
+            cal.setTimeInMillis(t.transDate);
             int dom = cal.get(Calendar.DAY_OF_MONTH);
             if (dom >= 1 && dom <= dim) {
                 daily[dom] += t.amount;

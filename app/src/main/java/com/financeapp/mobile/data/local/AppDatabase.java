@@ -13,22 +13,25 @@ import com.financeapp.mobile.data.local.dao.BudgetDao;
 import com.financeapp.mobile.data.local.dao.CategoryDao;
 import com.financeapp.mobile.data.local.dao.ChallengeDao;
 import com.financeapp.mobile.data.local.dao.TransactionDao;
+import com.financeapp.mobile.data.local.dao.UserDao;
 import com.financeapp.mobile.data.local.dao.WalletDao;
 import com.financeapp.mobile.data.local.entity.BudgetEntity;
 import com.financeapp.mobile.data.local.entity.CategoryEntity;
 import com.financeapp.mobile.data.local.entity.ChallengeEntity;
 import com.financeapp.mobile.data.local.entity.TransactionEntity;
+import com.financeapp.mobile.data.local.entity.UserEntity;
 import com.financeapp.mobile.data.local.entity.WalletEntity;
 
 @Database(
         entities = {
+                UserEntity.class,
                 WalletEntity.class,
                 CategoryEntity.class,
                 TransactionEntity.class,
                 BudgetEntity.class,
                 ChallengeEntity.class
         },
-        version = 3,
+        version = 4,
         exportSchema = false)
 public abstract class AppDatabase extends RoomDatabase {
 
@@ -49,9 +52,6 @@ public abstract class AppDatabase extends RoomDatabase {
         }
     };
 
-    /**
-     * Thêm userId / currency / soft-delete; đổi unique index categories & budgets.
-     */
     static final Migration MIGRATION_2_3 = new Migration(2, 3) {
         @Override
         public void migrate(@NonNull SupportSQLiteDatabase db) {
@@ -67,7 +67,6 @@ public abstract class AppDatabase extends RoomDatabase {
             db.execSQL("ALTER TABLE transactions ADD COLUMN isDeleted INTEGER NOT NULL DEFAULT 0");
 
             db.execSQL("ALTER TABLE budgets ADD COLUMN userId TEXT");
-
             db.execSQL("ALTER TABLE challenges ADD COLUMN userId TEXT");
 
             db.execSQL("DROP INDEX IF EXISTS `index_categories_name_kind`");
@@ -103,12 +102,9 @@ public abstract class AppDatabase extends RoomDatabase {
     }
 
     public abstract WalletDao walletDao();
-
     public abstract CategoryDao categoryDao();
-
     public abstract TransactionDao transactionDao();
-
     public abstract BudgetDao budgetDao();
-
     public abstract ChallengeDao challengeDao();
+    public abstract UserDao userDao();
 }

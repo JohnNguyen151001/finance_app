@@ -12,16 +12,24 @@ import java.util.List;
 @Dao
 public interface TransactionDao {
 
-    @Query("SELECT * FROM transactions WHERE userId = :uid AND isDeleted = 0 AND occurredAt >= :from AND occurredAt < :to ORDER BY occurredAt DESC")
+    @Query("SELECT * FROM transactions " +
+           "INNER JOIN wallets ON transactions.wallet_id = wallets.wallet_id " +
+           "WHERE wallets.user_id = :uid AND transactions.is_deleted = 0 " +
+           "AND transactions.trans_date >= :from AND transactions.trans_date < :to " +
+           "ORDER BY transactions.trans_date DESC")
     List<TransactionEntity> getBetweenForUser(String uid, long from, long to);
 
-    @Query("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE userId = :uid AND isDeleted = 0 AND categoryId = :categoryId AND type = :expenseType AND occurredAt >= :from AND occurredAt < :to")
-    double sumExpenseForCategoryBetweenForUser(String uid, long categoryId, String expenseType, long from, long to);
+    @Query("SELECT COALESCE(SUM(amount), 0) FROM transactions " +
+           "INNER JOIN wallets ON transactions.wallet_id = wallets.wallet_id " +
+           "WHERE wallets.user_id = :uid AND transactions.is_deleted = 0 " +
+           "AND transactions.category_id = :categoryId " +
+           "AND transactions.trans_date >= :from AND transactions.trans_date < :to")
+    double sumExpenseForCategoryBetweenForUser(String uid, long categoryId, long from, long to);
 
-    @Query("SELECT COALESCE(SUM(amount), 0) FROM transactions WHERE userId = :uid AND isDeleted = 0 AND categoryId = :categoryId AND (type = :expenseType OR type = :borrowType) AND occurredAt >= :from AND occurredAt < :to")
-    double sumBudgetOutgoingForCategoryBetweenForUser(String uid, long categoryId, String expenseType, String borrowType, long from, long to);
-
-    @Query("SELECT * FROM transactions WHERE userId = :uid AND isDeleted = 0 ORDER BY occurredAt DESC LIMIT :limit")
+    @Query("SELECT * FROM transactions " +
+           "INNER JOIN wallets ON transactions.wallet_id = wallets.wallet_id " +
+           "WHERE wallets.user_id = :uid AND transactions.is_deleted = 0 " +
+           "ORDER BY transactions.trans_date DESC LIMIT :limit")
     List<TransactionEntity> getRecentForUser(String uid, int limit);
 
     @Insert
@@ -30,6 +38,6 @@ public interface TransactionDao {
     @Update
     void update(TransactionEntity transaction);
 
-    @Query("DELETE FROM transactions WHERE id = :id")
+    @Query("DELETE FROM transactions WHERE transaction_id = :id")
     void deleteById(long id);
 }

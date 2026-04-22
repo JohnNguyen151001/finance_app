@@ -11,13 +11,13 @@ import java.util.List;
 @Dao
 public interface CategoryDao {
 
-    @Query("SELECT * FROM categories WHERE (userId IS NULL OR userId = :uid) AND isDeleted = 0 AND kind = :kind ORDER BY name ASC")
+    @Query("SELECT * FROM categories WHERE (user_id IS NULL OR user_id = :uid) AND is_deleted = 0 AND type = :kind ORDER BY name ASC")
     List<CategoryEntity> getByKindForUser(String uid, String kind);
 
-    @Query("SELECT * FROM categories WHERE (userId IS NULL OR userId = :uid) AND isDeleted = 0 ORDER BY name ASC")
+    @Query("SELECT * FROM categories WHERE (user_id IS NULL OR user_id = :uid) AND is_deleted = 0 ORDER BY name ASC")
     List<CategoryEntity> getAllForUser(String uid);
 
-    @Query("SELECT * FROM categories WHERE id = :id LIMIT 1")
+    @Query("SELECT * FROM categories WHERE category_id = :id LIMIT 1")
     CategoryEntity getById(long id);
 
     @Insert

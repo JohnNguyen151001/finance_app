@@ -1,0 +1,22 @@
+flowchart TD
+    classDef start fill:#f5f5f5,stroke:#d1d1d1,stroke-width:2px;
+    classDef action fill:#fff0e8,stroke:#f97316,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#f59e0b,stroke-width:1px;
+    classDef success fill:#e8f8f1,stroke:#1cb072,stroke-width:1px;
+
+    A([Từ Tổng quan <br> Bấm 'Xem báo cáo']):::start --> B[Mặc định chọn<br>kỳ hạn 'Tháng này']:::action
+    
+    B --> C[ReportViewModel gọi TransactionRepo<br>Query dữ liệu theo Date]:::logic
+    
+    C --> D[Lọc bỏ các giao dịch có<br>excluded_from_report = true]:::logic
+    
+    D --> E[Tính toán 1: Thu nhập ròng<br>Tổng Thu - Tổng Chi]:::success
+    D --> F[Tính toán 2: Group By category_id<br>Để vẽ biểu đồ Donut]:::success
+    D --> G[Tính toán 3: Group By txn_date (tuần)<br>Để vẽ biểu đồ Cột]:::success
+    
+    E & F & G --> H([Render UI Báo cáo]):::start
+    
+    H --> I{Người dùng đổi<br>bộ lọc thời gian/nhóm?}:::logic
+    I -- Có --> J[Cập nhật tham số query]:::action
+    J --> C
+    I -- Không --> K([Xem chi tiết hoặc Đóng]):::start

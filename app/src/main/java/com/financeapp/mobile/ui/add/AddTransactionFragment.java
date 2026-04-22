@@ -48,6 +48,8 @@ public class AddTransactionFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         viewModel = new ViewModelProvider(this).get(AddTransactionViewModel.class);
 
+        // Đảm bảo ngày mặc định là hiện tại
+        selectedDateMs = System.currentTimeMillis();
         binding.textDate.setText(DateDisplayUtils.formatFullDate(selectedDateMs));
         binding.textDate.setOnClickListener(v -> pickDate());
 
@@ -58,25 +60,15 @@ public class AddTransactionFragment extends Fragment {
             public void onTabSelected(com.google.android.material.tabs.TabLayout.Tab tab) {
                 viewModel.setTab(tab.getPosition());
             }
-
             @Override
-            public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {
-            }
-
+            public void onTabUnselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
             @Override
-            public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {
-            }
+            public void onTabReselected(com.google.android.material.tabs.TabLayout.Tab tab) {}
         });
 
         binding.inputAmount.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
-
+            @Override public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+            @Override public void onTextChanged(CharSequence s, int start, int before, int count) {}
             @Override
             public void afterTextChanged(Editable s) {
                 double v = parseAmount(s != null ? s.toString() : "");
@@ -88,6 +80,8 @@ public class AddTransactionFragment extends Fragment {
         viewModel.getSaveDone().observe(getViewLifecycleOwner(), ok -> {
             if (Boolean.TRUE.equals(ok)) {
                 viewModel.clearSaveDone();
+                Toast.makeText(requireContext(), "Đã lưu giao dịch", Toast.LENGTH_SHORT).show();
+                // Pop back to main and the onResume in HomeFragment will trigger refresh
                 Navigation.findNavController(requireView()).popBackStack();
             }
         });
@@ -111,69 +105,91 @@ public class AddTransactionFragment extends Fragment {
     }
 
     private void applyMeta(AddTransactionViewModel.FormMeta meta) {
-        if (binding == null || meta == null) {
-            return;
-        }
+        if (binding == null || meta == null || !isAdded()) return;
+
+        // Cập nhật Wallet
         walletBuffer.clear();
         walletBuffer.addAll(meta.wallets);
         List<String> wNames = new ArrayList<>();
-        for (WalletEntity w : walletBuffer) {
-            wNames.add(w.name);
+        if (walletBuffer.isEmpty()) {
+            wNames.add("Chưa có ví (Vui lòng tạo ví)");
+        } else {
+            for (WalletEntity w : walletBuffer) {
+                wNames.add(w.name + " (" + MoneyUtils.formatShortMillion(w.balance) + ")");
+            }
         }
         ArrayAdapter<String> wa = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, wNames);
         binding.spinnerWallet.setAdapter(wa);
+        if (!walletBuffer.isEmpty()) binding.spinnerWallet.setSelection(0);
 
+        // Cập nhật Category
         categoryBuffer.clear();
         categoryBuffer.addAll(meta.categories);
         List<String> cNames = new ArrayList<>();
-        for (CategoryEntity c : categoryBuffer) {
-            cNames.add(c.iconKey != null ? (c.iconKey + "  " + c.name) : c.name);
+        if (categoryBuffer.isEmpty()) {
+            cNames.add("Không tìm thấy hạng mục");
+        } else {
+            for (CategoryEntity c : categoryBuffer) {
+                cNames.add(c.iconName != null ? (c.iconName + "  " + c.name) : c.name);
+            }
         }
         ArrayAdapter<String> ca = new ArrayAdapter<>(requireContext(),
                 android.R.layout.simple_spinner_dropdown_item, cNames);
         binding.spinnerCategory.setAdapter(ca);
+        if (!categoryBuffer.isEmpty()) binding.spinnerCategory.setSelection(0);
     }
 
     private void submit() {
-        if (walletBuffer.isEmpty() || categoryBuffer.isEmpty()) {
-            Toast.makeText(requireContext(), R.string.add_wallet, Toast.LENGTH_SHORT).show();
+        if (walletBuffer.isEmpty()) {
+            Toast.makeText(requireContext(), "Vui lòng tạo ví trước khi thêm giao dịch", Toast.LENGTH_SHORT).show();
             return;
         }
+        if (categoryBuffer.isEmpty()) {
+            Toast.makeText(requireContext(), "Vui lòng chọn hạng mục", Toast.LENGTH_SHORT).show();
+            return;
+        }
+        
         int wi = binding.spinnerWallet.getSelectedItemPosition();
         int ci = binding.spinnerCategory.getSelectedItemPosition();
-        if (wi == AdapterView.INVALID_POSITION || ci == AdapterView.INVALID_POSITION) {
-            Toast.makeText(requireContext(), R.string.add_category, Toast.LENGTH_SHORT).show();
+        
+        if (wi < 0 || ci < 0) {
+            Toast.makeText(requireContext(), "Vui lòng chọn ví và hạng mục", Toast.LENGTH_SHORT).show();
             return;
         }
+
         double amount = parseAmount(binding.inputAmount.getText() != null
                 ? binding.inputAmount.getText().toString() : "");
         if (amount <= 0) {
-            Toast.makeText(requireContext(), R.string.add_amount_hint, Toast.LENGTH_SHORT).show();
+            Toast.makeText(requireContext(), "Vui lòng nhập số tiền hợp lệ", Toast.LENGTH_SHORT).show();
             return;
         }
-        CharSequence note = binding.inputNote.getText();
+
         viewModel.save(
                 walletBuffer.get(wi).id,
                 categoryBuffer.get(ci).id,
                 amount,
-                note != null ? note.toString() : "",
+                binding.inputNote.getText().toString(),
                 selectedDateMs
         );
     }
 
     private static double parseAmount(String raw) {
-        if (raw == null) {
-            return 0;
-        }
-        String s = raw.replace(",", ".").replaceAll("[^0-9.]", "");
-        if (s.isEmpty()) {
-            return 0;
-        }
+        if (raw == null) return 0;
+        String s = raw.replaceAll("[^0-9]", "");
+        if (s.isEmpty()) return 0;
         try {
             return Double.parseDouble(s);
         } catch (NumberFormatException e) {
             return 0;
+        }
+    }
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        if (viewModel != null) {
+            viewModel.reloadMeta();
         }
     }
 

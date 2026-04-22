@@ -121,7 +121,7 @@ public class BudgetGroupSelectAdapter extends RecyclerView.Adapter<BudgetGroupSe
         }
 
         void bind(BudgetGroupSelectAdapter adapter, CategoryEntity c) {
-            String icon = c.iconKey != null ? c.iconKey : "📁";
+            String icon = c.iconName != null ? c.iconName : "📁";
             binding.categoryIcon.setText(icon);
             int bg = ICON_BG[(int) (Math.abs(c.id) % ICON_BG.length)];
             GradientDrawable circle = new GradientDrawable();

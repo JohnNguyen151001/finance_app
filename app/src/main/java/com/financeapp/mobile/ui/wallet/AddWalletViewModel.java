@@ -13,13 +13,14 @@ import com.financeapp.mobile.data.repository.WalletRepository;
 import com.google.firebase.auth.FirebaseAuth;
 
 /**
- * ViewModel tạo ví mới — chỉ lưu SQLite (Room).
+ * ViewModel thêm/sửa ví.
  */
 public class AddWalletViewModel extends AndroidViewModel {
 
     private final WalletRepository walletRepository;
     private final MutableLiveData<Boolean> saveSuccess = new MutableLiveData<>();
     private final MutableLiveData<String> errorMessage = new MutableLiveData<>();
+    private final MutableLiveData<WalletEntity> existingWallet = new MutableLiveData<>();
 
     public AddWalletViewModel(@NonNull Application application) {
         super(application);
@@ -28,11 +29,18 @@ public class AddWalletViewModel extends AndroidViewModel {
 
     public LiveData<Boolean> getSaveSuccess() { return saveSuccess; }
     public LiveData<String> getErrorMessage() { return errorMessage; }
+    public LiveData<WalletEntity> getExistingWallet() { return existingWallet; }
 
-    public void saveWallet(String name, String type, double balance) {
+    public void loadWallet(long id) {
+        if (id <= 0) return;
+        ((FinanceApp) getApplication()).databaseIo().execute(() -> {
+            existingWallet.postValue(walletRepository.getById(id));
+        });
+    }
+
+    public void saveWallet(long id, String name, String type, double balance) {
         if (name.isEmpty()) {
-            errorMessage.setValue(((FinanceApp) getApplication())
-                    .getString(com.financeapp.mobile.R.string.wallet_name_required));
+            errorMessage.setValue("Vui lòng nhập tên ví");
             return;
         }
 
@@ -40,18 +48,32 @@ public class AddWalletViewModel extends AndroidViewModel {
                 ? FirebaseAuth.getInstance().getCurrentUser().getUid()
                 : "";
 
-        WalletEntity wallet = new WalletEntity();
-        wallet.userId = userId.isEmpty() ? null : userId;
-        wallet.name = name;
-        wallet.type = type;
-        wallet.balance = balance;
-        wallet.createdAt = System.currentTimeMillis();
-        wallet.iconKey = defaultIconForType(type);
-        wallet.currency = "VND";
-        wallet.isDeleted = 0;
-
         ((FinanceApp) getApplication()).databaseIo().execute(() -> {
-            walletRepository.insert(wallet);
+            WalletEntity wallet;
+            if (id > 0) {
+                wallet = walletRepository.getById(id);
+                if (wallet == null) {
+                    saveSuccess.postValue(false);
+                    return;
+                }
+            } else {
+                wallet = new WalletEntity();
+                wallet.userId = userId.isEmpty() ? null : userId;
+                wallet.createdAt = System.currentTimeMillis();
+                wallet.currency = "VND";
+                wallet.isDeleted = 0;
+            }
+
+            wallet.name = name;
+            wallet.type = type;
+            wallet.balance = balance;
+            wallet.iconUrl = defaultIconForType(type);
+
+            if (id > 0) {
+                walletRepository.update(wallet);
+            } else {
+                walletRepository.insert(wallet);
+            }
             saveSuccess.postValue(true);
         });
     }

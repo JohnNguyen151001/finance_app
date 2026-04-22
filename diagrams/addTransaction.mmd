@@ -1,0 +1,36 @@
+flowchart TD
+    %% Định nghĩa màu sắc chuẩn hóa
+    classDef start fill:#f5f5f5,stroke:#d1d1d1,stroke-width:2px;
+    classDef action fill:#fff0e8,stroke:#f97316,stroke-width:1px;
+    classDef logic fill:#fff3e0,stroke:#f59e0b,stroke-width:1px;
+    classDef success fill:#e8f8f1,stroke:#1cb072,stroke-width:1px;
+    classDef error fill:#fef0f0,stroke:#e84040,stroke-width:1px;
+
+    %% Bắt đầu luồng
+    A([Bấm nút "+"]):::start --> B[Chọn loại giao dịch<br>Chi / Thu / Vay-Nợ]:::action
+    
+    %% Nút Hủy (Thoát ngang)
+    A -.-> Z([Bấm nút Hủy<br>Quay lại, không lưu gì]):::start
+
+    B --> C[Nhập số tiền<br>Bàn phím tùy chỉnh VND]:::action
+    C --> D[Chọn nhóm danh mục<br>VD: Ăn uống, Di chuyển...]:::action
+    D --> E[Thêm chi tiết (Tùy chọn)<br>Ghi chú, Ảnh, Chọn Ví, Đổi Ngày]:::action
+    E --> F{Số tiền<br>hợp lệ?}:::logic
+    
+    %% Nhánh Validate đầu vào
+    F -- Không (< 0) --> G[Báo lỗi / Mờ nút Lưu<br>Yêu cầu nhập lại]:::error
+    G --> C
+    
+    %% Nhánh Thành công
+    F -- Có (> 0) --> H[Lưu vào Database<br>Bảng TRANSACTION]:::success
+    
+    H --> I[Cập nhật số dư Ví<br>Bảng WALLET (+/- tùy loại)]:::success
+    
+    I --> J{Kiểm tra Ngân sách<br>Theo category_id}:::logic
+    
+    %% Nhánh Check Ngân sách (Budgeting)
+    J -- Vượt hạn mức --> K[Push thông báo<br>Cảnh báo vượt mức]:::error
+    K --> L
+    J -- Bình thường --> L[Cập nhật màn hình Tổng quan<br>Số dư mới, Biểu đồ, Lịch sử]:::success
+    
+    L --> M([Hoàn thành giao dịch]):::start

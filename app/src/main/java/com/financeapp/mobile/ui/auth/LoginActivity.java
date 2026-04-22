@@ -18,10 +18,15 @@ import androidx.biometric.BiometricManager;
 import androidx.biometric.BiometricPrompt;
 import androidx.core.content.ContextCompat;
 
+import com.financeapp.mobile.FinanceApp;
 import com.financeapp.mobile.R;
+import com.financeapp.mobile.data.bootstrap.DatabaseSeeder;
+import com.financeapp.mobile.data.local.AppDatabase;
+import com.financeapp.mobile.data.local.entity.UserEntity;
 import com.financeapp.mobile.databinding.ActivityLoginBinding;
 import com.financeapp.mobile.ui.main.MainActivity;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 
 import java.util.concurrent.Executor;
 
@@ -51,6 +56,7 @@ public class LoginActivity extends AppCompatActivity {
         super.onStart();
         // Nếu đã đăng nhập và đã xác thực email → thử biometric trước
         if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+            syncUserToLocalAndSeed(mAuth.getCurrentUser());
             BiometricManager biometricManager = BiometricManager.from(this);
             if (biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG)
                     == BiometricManager.BIOMETRIC_SUCCESS) {
@@ -64,6 +70,27 @@ public class LoginActivity extends AppCompatActivity {
         }
     }
 
+    private void syncUserToLocalAndSeed(FirebaseUser firebaseUser) {
+        if (firebaseUser == null) return;
+        
+        ((FinanceApp) getApplication()).databaseIo().execute(() -> {
+            AppDatabase db = AppDatabase.getInstance(getApplicationContext());
+            UserEntity user = new UserEntity();
+            user.uuid = firebaseUser.getUid();
+            user.email = firebaseUser.getEmail();
+            user.display_name = firebaseUser.getDisplayName();
+            user.created_at = System.currentTimeMillis();
+            db.userDao().insert(user);
+            
+            // Nếu là user mục tiêu và chưa có ví, hãy seed dữ liệu ngay
+            if ("tc09042004@gmail.com".equals(user.email)) {
+                if (db.walletDao().getAllForUser(user.uuid).isEmpty()) {
+                    DatabaseSeeder.seedDataForUser(db, user.uuid);
+                }
+            }
+        });
+    }
+
     // ─── Biometric ───────────────────────────────────────────────────────────
 
     private void showBiometricPrompt() {
@@ -73,7 +100,6 @@ public class LoginActivity extends AppCompatActivity {
                     @Override
                     public void onAuthenticationError(int errorCode, @NonNull CharSequence errString) {
                         super.onAuthenticationError(errorCode, errString);
-                        // Người dùng huỷ → ở lại màn login để nhập mật khẩu
                     }
 
                     @Override
@@ -116,7 +142,9 @@ public class LoginActivity extends AppCompatActivity {
                 .addOnCompleteListener(this, task -> {
                     binding.btnLogin.setEnabled(true);
                     if (task.isSuccessful()) {
-                        if (mAuth.getCurrentUser() != null && mAuth.getCurrentUser().isEmailVerified()) {
+                        FirebaseUser firebaseUser = mAuth.getCurrentUser();
+                        if (firebaseUser != null && firebaseUser.isEmailVerified()) {
+                            syncUserToLocalAndSeed(firebaseUser);
                             goToMain();
                         } else {
                             Toast.makeText(this, R.string.auth_verify_email, Toast.LENGTH_LONG).show();
